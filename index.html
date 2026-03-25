@@ -886,6 +886,15 @@ function deletePl(id) {
   renderSidebar();
 }
 
+function autoSync() {
+  const tok = localStorage.getItem('mp_tok');
+  const gid = localStorage.getItem('mp_gid');
+
+  if (!tok || !gid) return;
+
+  pushGist();
+}
+
 function savePls() {
   localStorage.setItem('mp_pls',JSON.stringify(playlists));
   renderSidebar();
@@ -1016,10 +1025,64 @@ function setSS(state,msg) {
   d.className='sdot'+(state==='ok'?' ok':state==='err'?' err':'');
   document.getElementById('smsg').textContent=msg;
 }
+async function pullGist() {
+  const tok = localStorage.getItem('mp_tok');
+  const gid = localStorage.getItem('mp_gid');
+
+  if (!tok || !gid) return;
+
+  try {
+    const res = await fetch(`https://api.github.com/gists/${gid}`, {
+      headers: {
+        "Authorization": "token " + tok
+      }
+    });
+
+    const data = await res.json();
+    const content = data.files["musicpro.json"].content;
+
+    const parsed = JSON.parse(content);
+
+    playlists = parsed.playlists || [];
+    favs = new Set(parsed.favs || []);
+
+    savePls();
+    renderLibrary();
+
+    setSS('ok', 'Pulled');
+    toast("⬇️ Loaded from GitHub");
+
+  } catch (e) {
+    setSS('err', 'Pull failed');
+    console.error(e);
+  }
+}
+function setSS(state, msg) {
+  const dot = document.getElementById('sdot');
+  const el  = document.getElementById('smsg');
+
+  if (!dot || !el) return;
+
+  dot.className = 'sdot' + (state === 'ok' ? ' ok' : state === 'err' ? ' err' : '');
+  el.textContent = msg;
+}
 function saveGist() {
-  const {tok,gid}=creds();
-  localStorage.setItem('mp_tok',tok); localStorage.setItem('mp_gid',gid);
-  toast('💾 Config saved'); setSS('ok','Saved · testing…'); testGist();
+  const tok = document.getElementById('ghToken').value.trim();
+  const gid = document.getElementById('ghGist').value.trim();
+
+  if (!tok || !gid) {
+    toast("❌ Enter token & gist ID");
+    return;
+  }
+
+  localStorage.setItem('mp_tok', tok);
+  localStorage.setItem('mp_gid', gid);
+
+  setSS('ok', 'Saved');
+
+  toast("✅ Connected to GitHub");
+
+  pushGist(); // immediate test push
 }
 async function testGist() {
   const {tok,gid}=creds();
@@ -1040,8 +1103,44 @@ async function autoSync() {
   } catch { setSS('err','Sync failed'); }
 }
 async function pushGist() {
-  const {tok,gid}=creds(); if (!tok||!gid) { toast('Configure token & Gist first'); return; }
-  setSS('','Pushing…'); await autoSync(); toast('☁️ Pushed to Gist');
+  const tok = localStorage.getItem('mp_tok');
+  const gid = localStorage.getItem('mp_gid');
+
+  if (!tok || !gid) {
+    toast("❌ Token or Gist missing");
+    return;
+  }
+
+  const data = {
+    playlists: playlists,
+    favs: [...favs]
+  };
+
+  try {
+    const res = await fetch(`https://api.github.com/gists/${gid}`, {
+      method: "PATCH",
+      headers: {
+        "Authorization": "token " + tok,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        files: {
+          "musicpro.json": {
+            content: JSON.stringify(data, null, 2)
+          }
+        }
+      })
+    });
+
+    if (!res.ok) throw new Error("Failed");
+
+    setSS('ok', 'Synced');
+    toast("✅ Synced to GitHub");
+  } catch (e) {
+    setSS('err', 'Sync failed');
+    console.error(e);
+    toast("❌ Sync failed");
+  }
 }
 async function pullGist() {
   const {tok,gid}=creds(); if (!tok||!gid) { toast('Configure token & Gist first'); return; }
