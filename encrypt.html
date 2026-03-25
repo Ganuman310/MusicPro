@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>GanuMan Encryptor</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080c14;--surface:#0e1420;--card:#141b28;--card2:#1a2235;
+  --border:#1f2d45;--border2:#263549;
+  --accent:#00d4ff;--accent-dim:#007799;
+  --gold:#f5a623;--red:#ff4d6d;--green:#2ecc71;--purple:#a78bfa;
+  --text:#e8edf5;--text2:#a0aec0;--text3:#4a5a72;
+  --radius:12px;--radius-sm:8px;
+  --font:'Outfit',sans-serif;--mono:'JetBrains Mono',monospace;
+}
+html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px}
+body{display:flex;flex-direction:column;align-items:center;padding:40px 16px 60px}
+
+.logo{text-align:center;margin-bottom:32px}
+.logo-mark{font-size:2rem;font-weight:800;letter-spacing:-1px}
+.logo-mark span{color:var(--accent)}
+.logo-sub{font-size:0.7rem;color:var(--text3);letter-spacing:3px;text-transform:uppercase;margin-top:4px;font-family:var(--mono)}
+.logo-desc{font-size:0.82rem;color:var(--text2);margin-top:8px;max-width:380px;line-height:1.65;text-align:center}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;width:100%;max-width:520px;margin-bottom:16px}
+.card h2{font-size:1rem;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.card p{font-size:0.78rem;color:var(--text2);line-height:1.65;margin-bottom:16px}
+
+.inp-label{font-size:0.62rem;color:var(--text3);font-family:var(--mono);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px}
+.inp{background:var(--card2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:9px 12px;color:var(--text);font-family:var(--mono);font-size:0.82rem;outline:none;width:100%;transition:border-color .15s;margin-bottom:12px}
+.inp:focus{border-color:var(--accent)}
+.inp::placeholder{color:var(--text3)}
+
+/* Drop zone */
+.dropzone{
+  border:2px dashed var(--border2);border-radius:var(--radius);padding:32px 20px;
+  text-align:center;cursor:pointer;transition:all .2s;margin-bottom:12px;
+  position:relative;background:var(--card2)
+}
+.dropzone:hover,.dropzone.drag{border-color:var(--accent);background:rgba(0,212,255,.04)}
+.dropzone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.dz-icon{font-size:2.2rem;margin-bottom:8px;display:block}
+.dz-text{font-size:0.85rem;color:var(--text2);line-height:1.6}
+.dz-text strong{color:var(--accent)}
+.dz-hint{font-size:0.72rem;color:var(--text3);margin-top:4px;font-family:var(--mono)}
+
+/* File queue */
+.file-queue{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.fq-item{
+  display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;
+  background:var(--card2);border:1px solid var(--border);border-radius:var(--radius-sm);
+  padding:8px 12px;font-size:0.8rem
+}
+.fq-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:var(--mono);color:var(--text2)}
+.fq-size{font-size:0.7rem;color:var(--text3);font-family:var(--mono);white-space:nowrap}
+.fq-status{font-size:0.78rem;white-space:nowrap}
+.fq-status.pending{color:var(--text3)}
+.fq-status.working{color:var(--gold)}
+.fq-status.done{color:var(--green)}
+.fq-status.err{color:var(--red)}
+.fq-remove{background:none;border:none;color:var(--text3);cursor:pointer;padding:2px 6px;border-radius:4px;font-size:1rem;line-height:1;transition:color .15s}
+.fq-remove:hover{color:var(--red)}
+
+/* Progress bar */
+.prog-wrap{background:var(--card2);border:1px solid var(--border);border-radius:6px;height:6px;overflow:hidden;margin-bottom:12px;display:none}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--accent-dim),var(--accent));border-radius:6px;transition:width .3s;width:0%}
+
+/* Buttons */
+.btn-row{display:flex;gap:8px;flex-wrap:wrap}
+.btn-p{padding:10px 22px;border-radius:var(--radius-sm);background:var(--accent);color:#000;border:none;cursor:pointer;font-family:var(--font);font-size:0.83rem;font-weight:700;transition:background .15s,transform .1s;display:flex;align-items:center;gap:6px}
+.btn-p:hover{background:#33ddff}
+.btn-p:active{transform:scale(.97)}
+.btn-p:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.btn-s{padding:10px 18px;border-radius:var(--radius-sm);background:none;color:var(--text2);border:1px solid var(--border2);cursor:pointer;font-family:var(--font);font-size:0.83rem;transition:all .15s}
+.btn-s:hover{border-color:var(--text2);color:var(--text)}
+
+/* Info / result box */
+.result{margin-top:14px;padding:12px 14px;border-radius:var(--radius-sm);font-size:0.8rem;line-height:1.65;display:none}
+.result.ok{background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.25);color:#7defa3}
+.result.err{background:rgba(255,77,109,.08);border:1px solid rgba(255,77,109,.25);color:#ff8fa3}
+.result.info{background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.2);color:var(--text2)}
+
+/* How-to steps */
+.steps{counter-reset:step;list-style:none;display:flex;flex-direction:column;gap:10px}
+.steps li{counter-increment:step;display:flex;gap:12px;font-size:0.8rem;color:var(--text2);line-height:1.6}
+.steps li::before{content:counter(step);width:22px;height:22px;border-radius:50%;background:var(--accent-dim);color:var(--accent);font-family:var(--mono);font-size:0.7rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.steps li code{background:var(--card2);border:1px solid var(--border2);border-radius:4px;padding:1px 6px;font-family:var(--mono);font-size:0.74rem;color:var(--accent)}
+
+/* Security badge */
+.sec-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.2);border-radius:20px;padding:4px 12px;font-size:0.72rem;color:var(--purple);font-family:var(--mono);margin-bottom:20px}
+
+/* Warning card */
+.warn-card{background:rgba(245,166,35,.05);border:1px solid rgba(245,166,35,.2);border-radius:var(--radius);padding:16px 20px;max-width:520px;width:100%;margin-bottom:16px}
+.warn-card p{font-size:0.78rem;color:#f5c842;line-height:1.65}
+.warn-card strong{color:var(--gold)}
+
+@media(max-width:560px){
+  body{padding:24px 12px 40px}
+  .logo{margin-bottom:24px}
+  .logo-mark{font-size:1.5rem}
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="logo">
+  <div class="logo-mark">Ganu<span>Man</span> Encryptor</div>
+  <div class="logo-sub">Private Audio Protection Tool</div>
+  <div class="logo-desc">Encrypt your MP3 files into <code style="color:var(--accent);background:var(--card);border:1px solid var(--border);border-radius:4px;padding:1px 7px;font-size:0.78rem">.ganuman</code> format. Only your MusicPro player can decrypt and play them.</div>
+</div>
+
+<div class="sec-badge">🔐 AES-256-GCM · 200,000-round PBKDF2 · Browser-only · Nothing uploaded</div>
+
+<!-- Encrypt Card -->
+<div class="card">
+  <h2>🎵 Encrypt MP3 Files</h2>
+  <p>Select one or multiple MP3 files. Each will be encrypted with your secret key and downloaded as a <code style="color:var(--accent)">.ganuman</code> file ready to upload to your GitHub <code style="color:var(--accent)">Database/</code> folder.</p>
+
+  <!-- Drop zone -->
+  <div class="dropzone" id="dropzone">
+    <input type="file" id="fileInput" accept=".mp3,audio/mpeg,audio/*" multiple/>
+    <span class="dz-icon">🎧</span>
+    <div class="dz-text">Drop MP3 files here or <strong>click to browse</strong></div>
+    <div class="dz-hint">Supports multiple files at once</div>
+  </div>
+
+  <!-- File queue -->
+  <div class="file-queue" id="fileQueue"></div>
+
+  <!-- Progress bar -->
+  <div class="prog-wrap" id="progWrap">
+    <div class="prog-fill" id="progFill"></div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn-p" id="encryptBtn" onclick="encryptAll()" disabled>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      Encrypt &amp; Download All
+    </button>
+    <button class="btn-s" onclick="clearQueue()">Clear</button>
+  </div>
+
+  <div class="result" id="resultBox"></div>
+</div>
+
+<!-- How to use -->
+<div class="card">
+  <h2>📋 How to use</h2>
+  <ul class="steps">
+    <li>Open this <strong>encrypt.html</strong> file in your browser on your desktop (just double-click it — no internet needed)</li>
+    <li>Drop your MP3 files into the box above and click <strong>Encrypt &amp; Download All</strong></li>
+    <li>Each file downloads as <code>filename.ganuman</code> — save them anywhere</li>
+    <li>Upload the <code>.ganuman</code> files into your GitHub repo's <code>Database/</code> folder</li>
+    <li>In <strong>MusicPro → Settings → Your Tracks</strong>, list each file with <code>.ganuman</code> extension (e.g. <code>mysong.ganuman</code>)</li>
+    <li>The player will automatically decrypt and stream each file when you play it</li>
+  </ul>
+</div>
+
+<!-- Security note -->
+<div class="card">
+  <h2>🛡 Security details</h2>
+  <p style="margin-bottom:10px">Each file is protected with:</p>
+  <ul class="steps">
+    <li><strong>AES-256-GCM</strong> — military-grade symmetric encryption. The same algorithm used by banks and governments.</li>
+    <li><strong>PBKDF2 with 200,000 iterations</strong> — even a simple password becomes computationally expensive to brute-force</li>
+    <li><strong>Random salt + IV per file</strong> — encrypting the same file twice produces completely different output, preventing pattern analysis</li>
+    <li><strong>Custom <code>.ganuman</code> magic header</strong> — anyone who finds your files won't even know what format they are</li>
+    <li><strong>100% browser-side</strong> — your files and password never leave your device during encryption</li>
+  </ul>
+</div>
+
+<!-- Warning -->
+<div class="warn-card">
+  <p>⚠️ <strong>Keep this file private.</strong> The encryption key is embedded inside <code>encrypt.html</code> and <code>index.html</code>. Do not share or publish these files. If you push them to a <em>public</em> GitHub repo, anyone who reads the source code will find the key. Host your player on GitHub Pages but keep the source repo <strong>private</strong>, or accept that determined people could find the key in the HTML source.</p>
+</div>
+
+<script>
+/* ═══════════════════════════════════
+   HARDCODED KEY — MUST MATCH index.html
+═══════════════════════════════════ */
+const GM_PASS  = 'Ganu&Anu#1999! Love';
+const GM_MAGIC = new Uint8Array([0x47,0x41,0x4E,0x55,0x4D,0x41,0x4E,0x21]); // "GANUMAN!"
+
+/* ═══════════════════════════════════
+   FILE QUEUE
+═══════════════════════════════════ */
+let queue = []; // [{file, status:'pending'|'working'|'done'|'err', msg}]
+
+const dropzone  = document.getElementById('dropzone');
+const fileInput = document.getElementById('fileInput');
+const queueEl   = document.getElementById('fileQueue');
+const encBtn    = document.getElementById('encryptBtn');
+const progWrap  = document.getElementById('progWrap');
+const progFill  = document.getElementById('progFill');
+const resultBox = document.getElementById('resultBox');
+
+// Drag events
+dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('drag'); });
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag'));
+dropzone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropzone.classList.remove('drag');
+  addFiles([...e.dataTransfer.files]);
+});
+fileInput.addEventListener('change', () => { addFiles([...fileInput.files]); fileInput.value=''; });
+
+function addFiles(files) {
+  files.filter(f => f.type.startsWith('audio/') || f.name.toLowerCase().endsWith('.mp3')).forEach(f => {
+    if (!queue.find(q => q.file.name === f.name && q.file.size === f.size)) {
+      queue.push({ file:f, status:'pending', msg:'' });
+    }
+  });
+  renderQueue();
+}
+
+function removeItem(i) {
+  queue.splice(i, 1);
+  renderQueue();
+}
+
+function clearQueue() {
+  queue = [];
+  renderQueue();
+  hideResult();
+  progWrap.style.display = 'none';
+  progFill.style.width = '0%';
+}
+
+function renderQueue() {
+  encBtn.disabled = queue.length === 0;
+  if (!queue.length) { queueEl.innerHTML = ''; return; }
+  queueEl.innerHTML = queue.map((item, i) => `
+    <div class="fq-item">
+      <div class="fq-name" title="${esc(item.file.name)}">${esc(item.file.name)}</div>
+      <div class="fq-size">${fmtSize(item.file.size)}</div>
+      <div class="fq-status ${item.status}">${statusLabel(item)}</div>
+      ${item.status === 'pending' ? `<button class="fq-remove" onclick="removeItem(${i})" title="Remove">×</button>` : '<div></div>'}
+    </div>
+  `).join('');
+}
+
+function statusLabel(item) {
+  if (item.status === 'pending') return '⏳ Waiting';
+  if (item.status === 'working') return '🔐 Encrypting…';
+  if (item.status === 'done')    return '✅ Done';
+  return '❌ ' + (item.msg || 'Error');
+}
+
+function fmtSize(b) {
+  if (b < 1024) return b + ' B';
+  if (b < 1024*1024) return (b/1024).toFixed(1) + ' KB';
+  return (b/1024/1024).toFixed(1) + ' MB';
+}
+
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+/* ═══════════════════════════════════
+   CRYPTO
+═══════════════════════════════════ */
+async function deriveKey(salt) {
+  const raw = await crypto.subtle.importKey(
+    'raw', new TextEncoder().encode(GM_PASS), 'PBKDF2', false, ['deriveKey']
+  );
+  return crypto.subtle.deriveKey(
+    { name:'PBKDF2', salt, iterations:200000, hash:'SHA-256' },
+    raw, { name:'AES-GCM', length:256 }, false, ['encrypt']
+  );
+}
+
+async function encryptOne(item) {
+  item.status = 'working'; renderQueue();
+  try {
+    const data   = new Uint8Array(await item.file.arrayBuffer());
+    const salt   = crypto.getRandomValues(new Uint8Array(16));
+    const iv     = crypto.getRandomValues(new Uint8Array(12));
+    const key    = await deriveKey(salt);
+    const cipher = new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM', iv}, key, data));
+
+    // Build output: magic(8) + salt(16) + iv(12) + ciphertext
+    const out = new Uint8Array(GM_MAGIC.length + 16 + 12 + cipher.length);
+    let off = 0;
+    out.set(GM_MAGIC, off); off += GM_MAGIC.length;
+    out.set(salt, off);     off += 16;
+    out.set(iv, off);       off += 12;
+    out.set(cipher, off);
+
+    // Trigger download
+    const outName = item.file.name.replace(/\.(mp3|m4a|aac|ogg|wav|flac)$/i, '') + '.ganuman';
+    const blob = new Blob([out], {type:'application/octet-stream'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = outName;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+
+    item.status = 'done'; item.outName = outName;
+  } catch(e) {
+    item.status = 'err'; item.msg = e.message;
+  }
+  renderQueue();
+}
+
+async function encryptAll() {
+  const pending = queue.filter(i => i.status === 'pending' || i.status === 'err');
+  if (!pending.length) { showResult('info', 'All files are already encrypted! Add new files or click Clear.'); return; }
+
+  encBtn.disabled = true;
+  progWrap.style.display = 'block';
+  hideResult();
+
+  let done = 0;
+  for (const item of pending) {
+    await encryptOne(item);
+    done++;
+    progFill.style.width = Math.round((done / pending.length) * 100) + '%';
+  }
+
+  encBtn.disabled = false;
+  const ok    = queue.filter(i => i.status === 'done').length;
+  const errs  = queue.filter(i => i.status === 'err').length;
+  const names = queue.filter(i => i.status === 'done').map(i => i.outName).join(', ');
+
+  if (errs === 0) {
+    showResult('ok', `✅ All ${ok} file${ok!==1?'s':''} encrypted successfully!\n\nDownloaded: ${names}\n\nUpload these .ganuman files to your GitHub Database/ folder, then list them in MusicPro Settings → Your Tracks.`);
+  } else {
+    showResult('err', `⚠️ ${ok} file${ok!==1?'s':''} encrypted, ${errs} failed. Check the errors above.`);
+  }
+}
+
+function showResult(type, msg) {
+  resultBox.className = 'result ' + type;
+  resultBox.style.display = 'block';
+  resultBox.style.whiteSpace = 'pre-line';
+  resultBox.textContent = msg;
+}
+function hideResult() {
+  resultBox.style.display = 'none';
+}
+</script>
+</body>
+</html>
