@@ -1464,14 +1464,16 @@ async function startWithDecrypt(gi) {
       const cache = await caches.open(CACHE_NAME);
       const cached = await cache.match(t.file);
       if (cached) {
-        buf = await cached.arrayBuffer();
+        // Clone before reading so the cached Response body is never consumed
+        buf = await cached.clone().arrayBuffer();
       } else {
         const resp = await fetch(t.file);
         if (!resp.ok) { toast('❌ File not found: ' + t.name); return; }
+        // Clone before reading so we still have a pristine Response to store
+        const respToCache = resp.clone();
         buf = await resp.arrayBuffer();
         // Cache the encrypted file for next time
-        const cacheResp = new Response(buf.slice(0), { headers: { 'Content-Type': 'application/octet-stream' } });
-        cache.put(t.file, cacheResp);
+        cache.put(t.file, respToCache);
       }
 
       const burl = await _gmDecrypt(buf);
