@@ -1320,8 +1320,28 @@ async function cacheUrl(url) {
     const cache = await caches.open(CACHE_NAME);
     const existing = await cache.match(url);
     if (existing) return true;
-    const resp = await fetch(url);
-    if (resp.ok) { await cache.put(url, resp.clone()); return true; }
+    // Fetch without Range headers so we always get a full 200 response.
+    // GitHub Pages / CDNs sometimes return 206 Partial Content for audio
+    // files, which the Cache API refuses to store.
+    const resp = await fetch(url, {
+      headers: { Range: '' },   // override any implicit Range the browser adds
+      cache: 'no-store'
+    });
+    if (!resp.ok && resp.status !== 206) return false;
+    // If we still got a 206, read the body and wrap it in a synthetic 200
+    // so the Cache API accepts it.
+    if (resp.status === 206 || !resp.ok) {
+      const buf = await resp.arrayBuffer();
+      const ct = resp.headers.get('Content-Type') || 'application/octet-stream';
+      const full = new Response(buf, {
+        status: 200,
+        headers: { 'Content-Type': ct, 'Content-Length': String(buf.byteLength) }
+      });
+      await cache.put(url, full);
+    } else {
+      await cache.put(url, resp);
+    }
+    return true;
   } catch(e) { console.warn('Cache write failed', e); }
   return false;
 }
