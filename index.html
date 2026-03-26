@@ -71,9 +71,9 @@ body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);
 .sort-chip:hover,.sort-chip.on{border-color:var(--accent);color:var(--accent);background:rgba(0,212,255,.06)}
 
 /* ── TRACK TABLE ── */
-.track-head{display:grid;grid-template-columns:36px 1fr 80px 44px;gap:8px;padding:6px 10px 6px 24px;color:var(--text3);font-size:0.62rem;text-transform:uppercase;letter-spacing:1px;font-family:var(--mono);border-bottom:1px solid var(--border);margin:6px 24px 0;flex-shrink:0}
+.track-head{display:grid;grid-template-columns:36px 1fr 80px 32px 44px;gap:8px;padding:6px 10px 6px 24px;color:var(--text3);font-size:0.62rem;text-transform:uppercase;letter-spacing:1px;font-family:var(--mono);border-bottom:1px solid var(--border);margin:6px 24px 0;flex-shrink:0}
 .track-scroll{flex:1;overflow-y:auto;padding:4px 12px 8px}
-.track-row{display:grid;grid-template-columns:36px 1fr 80px 44px;gap:8px;align-items:center;padding:7px 12px;border-radius:var(--radius-sm);cursor:pointer;border:1px solid transparent;transition:background .12s,border-color .12s}
+.track-row{display:grid;grid-template-columns:36px 1fr 80px 32px 44px;gap:8px;align-items:center;padding:7px 12px;border-radius:var(--radius-sm);cursor:pointer;border:1px solid transparent;transition:background .12s,border-color .12s}
 .track-row:hover{background:var(--card)}
 .track-row.playing{background:rgba(0,212,255,.06);border-color:rgba(0,212,255,.15)}
 .track-row.playing .trk-name{color:var(--accent)}
@@ -92,6 +92,12 @@ body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);
 .trk-btn{background:none;border:none;color:var(--text3);cursor:pointer;padding:4px;border-radius:5px;display:flex;align-items:center;opacity:0;transition:opacity .12s,color .12s}
 .track-row:hover .trk-btn{opacity:1}
 .trk-btn:hover{color:var(--accent)}
+.dl-btn{background:none;border:none;cursor:pointer;padding:4px;border-radius:5px;display:flex;align-items:center;justify-content:center;transition:color .15s,transform .15s;flex-shrink:0}
+.dl-btn.cached{color:var(--green);pointer-events:none}
+.dl-btn.uncached{color:var(--text3)}
+.dl-btn.uncached:hover{color:var(--accent);transform:scale(1.15)}
+.dl-btn.downloading{color:var(--gold);animation:dlpulse .8s ease-in-out infinite alternate}
+@keyframes dlpulse{from{opacity:.4}to{opacity:1}}
 
 /* ── PLAYLIST VIEW HERO ── */
 .pl-hero{display:flex;align-items:flex-end;gap:18px;padding:18px 24px 16px;flex-shrink:0;border-bottom:1px solid var(--border)}
@@ -106,8 +112,8 @@ body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);
 .pl-icon:hover{border-color:var(--text2);color:var(--text)}
 
 /* Playlist track rows (extra drag column) */
-.pl-head{grid-template-columns:18px 36px 1fr 80px 44px}
-.pl-row{grid-template-columns:18px 36px 1fr 80px 44px}
+.pl-head{grid-template-columns:18px 36px 1fr 80px 32px 44px}
+.pl-row{grid-template-columns:18px 36px 1fr 80px 32px 44px}
 .drag-handle{color:var(--text3);opacity:0;transition:opacity .12s;cursor:grab;display:flex;align-items:center}
 .track-row:hover .drag-handle{opacity:1}
 .track-row.drag-over{border-color:var(--accent)!important}
@@ -194,8 +200,12 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border:none;border-ra
 .right-ctrl{display:flex;align-items:center;gap:8px;justify-content:flex-end}
 .vol-wrap{display:flex;align-items:center;gap:6px}
 .vol-wrap input{width:78px}
-.speed-pill{background:var(--card);border:1px solid var(--border2);border-radius:6px;padding:3px 8px;font-family:var(--mono);font-size:0.7rem;color:var(--text3);cursor:pointer;transition:all .15s;white-space:nowrap}
-.speed-pill:hover{border-color:var(--accent);color:var(--accent)}
+.speed-pill,.speed-val{background:var(--card);border:1px solid var(--border2);border-radius:6px;padding:3px 0;font-family:var(--mono);font-size:0.7rem;color:var(--text3);white-space:nowrap;width:42px;text-align:center;display:inline-block;flex-shrink:0}
+.speed-wrap{display:flex;align-items:center;gap:6px}
+.speed-btn{background:none;border:none;cursor:pointer;padding:3px;border-radius:6px;transition:transform .15s,background .15s,opacity .15s;display:flex;align-items:center;justify-content:center;color:var(--text2)}
+.speed-btn:hover{background:var(--card2);transform:scale(1.15);color:var(--text)}
+.speed-btn:active{transform:scale(.9)}
+.speed-btn svg{display:block;overflow:visible}
 
 /* ── TOAST ── */
 .toast{position:fixed;bottom:calc(var(--player)+12px);left:50%;transform:translateX(-50%) translateY(8px);background:var(--card2);border:1px solid var(--border2);border-radius:10px;padding:8px 16px;font-size:0.8rem;color:var(--text);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:500;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.4)}
@@ -318,7 +328,7 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border:none;border-ra
         <input id="libSearch" placeholder="Search lectures…"/>
       </div>
     </div>
-    <div class="track-head"><div>#</div><div>Title</div><div>Duration</div><div></div></div>
+    <div class="track-head"><div>#</div><div>Title</div><div>Duration</div><div title="Downloaded"></div><div></div></div>
     <div class="track-scroll" id="libRows"></div>
   </div>
 
@@ -339,10 +349,13 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border:none;border-ra
           <button class="pl-icon" title="Add from library" onclick="gotoView('library');toast('Right-click any track → Add to playlist')">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           </button>
+          <button class="pl-icon" id="plDlBtn" title="Download all tracks in this playlist" onclick="downloadPlaylist()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          </button>
         </div>
       </div>
     </div>
-    <div class="track-head pl-head"><div></div><div>#</div><div>Title</div><div>Duration</div><div></div></div>
+    <div class="track-head pl-head"><div></div><div>#</div><div>Title</div><div>Duration</div><div title="Downloaded"></div><div></div></div>
     <div class="track-scroll" id="plRows"></div>
   </div>
 
@@ -382,12 +395,11 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border:none;border-ra
       </div>
 
       <div class="s-card">
-        <h3>📥 Offline Cache</h3>
-        <p>Tracks are automatically cached when played so they work offline and load instantly — stored permanently until you clear them here.</p>
+        <h3>📥 Offline Storage</h3>
+        <p>Tap the ⬇️ icon on any track to download it for offline playback. Downloaded tracks show a ✅ tick. Use the playlist download button to grab an entire playlist at once.</p>
         <div class="sync-row" style="margin-bottom:12px"><span class="sdot" id="cacheDot"></span><span id="cacheMsg">Calculating…</span></div>
         <div class="btn-row">
-          <button class="btn-p" onclick="cacheAllTracks()">⬇️ Cache All Tracks Now</button>
-          <button class="btn-s" style="border-color:var(--red);color:var(--red)" onclick="clearAudioCache()">🗑️ Clear Cache</button>
+          <button class="btn-s" style="border-color:var(--red);color:var(--red)" onclick="clearAudioCache()">🗑️ Clear All Downloads</button>
         </div>
       </div>
 
@@ -438,7 +450,11 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border:none;border-ra
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
       </button>
       <button class="cb" id="btnRepeat" title="Repeat" onclick="cycleRepeat()">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+        <svg id="repeatIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+          <polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+          <text id="repeatOne" x="12" y="14.5" text-anchor="middle" font-size="8" font-weight="700" font-family="Outfit,sans-serif" fill="currentColor" stroke="none" style="display:none">1</text>
+        </svg>
       </button>
     </div>
     <div class="prog-row">
@@ -454,7 +470,29 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border:none;border-ra
       <svg id="iMute" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
     </button>
     <div class="vol-wrap"><input type="range" id="volBar" min="0" max="1" step="0.02" value="1"/></div>
-    <span class="speed-pill" id="speedPill" onclick="cycleSpeed()">1.0×</span>
+    <div class="speed-wrap">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text3);flex-shrink:0">
+        <path d="M12 2a10 10 0 1 1 0 20A10 10 0 0 1 12 2z"/>
+        <path d="M12 12L8 8"/>
+        <circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/>
+        <path d="M7 12h1M16 12h1M12 7v1"/>
+      </svg>
+      <button class="speed-btn" id="speedSlower" title="Slower" onclick="changeSpeed(-1)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="8 12 12 8 16 12"/>
+          <line x1="12" y1="16" x2="12" y2="8"/>
+        </svg>
+      </button>
+      <span class="speed-val" id="speedPill">1.0×</span>
+      <button class="speed-btn" id="speedFaster" title="Faster" onclick="changeSpeed(1)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="8 12 12 16 16 12"/>
+          <line x1="12" y1="8" x2="12" y2="16"/>
+        </svg>
+      </button>
+    </div>
     <button class="cb" title="Sleep timer" onclick="openSleepModal()">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
     </button>
@@ -490,6 +528,7 @@ let ctxTrk      = null;
 let dragSrc     = null;
 let favs        = new Set();
 let libQ        = '';
+let cachedFiles = new Set(); // tracks which file URLs are in cache
 
 /* ── DOM ── */
 const audio = document.getElementById('audio');
@@ -505,6 +544,8 @@ document.addEventListener('DOMContentLoaded', () => {
   try { favs = new Set(JSON.parse(localStorage.getItem('mp_favs')||'[]')); } catch{}
   spIdx = parseInt(localStorage.getItem('mp_sp')||'2')||2;
   document.getElementById('speedPill').textContent = speeds[spIdx]+'×';
+  document.getElementById('speedSlower').style.opacity = spIdx===0?'0.3':'1';
+  document.getElementById('speedFaster').style.opacity = spIdx===speeds.length-1?'0.3':'1';
 
   const tok = localStorage.getItem('mp_tok')||'';
   const gid = localStorage.getItem('mp_gid')||'';
@@ -535,7 +576,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   initEmojiGrid();
   renderSidebar();
-  // Init cache status (lazy — only reads when needed)
+  // Load which files are already downloaded
+  refreshCachedFiles().then(() => { renderLibrary(); });
   updateCacheStatus();
 });
 
@@ -612,6 +654,7 @@ function renderLibrary() {
     const gi = tracks.indexOf(t);
     const isNow = nowTrack && nowTrack.file===t.file;
     const dur = durations[t.file] ? fmt(durations[t.file]) : '—';
+    const isCached = cachedFiles.has(t.file);
     return `<div class="track-row${isNow?' playing':''}" onclick="playLib(${gi})" oncontextmenu="openCtx(event,${gi})">
       <div class="trk-idx"><span class="num">${i+1}</span><div class="eq-wrap">
         <div class="eq-bar${playing?'':' p'}" style="height:60%"></div>
@@ -620,6 +663,12 @@ function renderLibrary() {
       </div></div>
       <div class="trk-info"><div class="trk-name">${t.title}</div><div class="trk-meta">${t.name.replace(/\.ganuman$/i,"")}</div></div>
       <div class="trk-dur" id="ld-${gi}">${dur}</div>
+      <button class="dl-btn ${isCached?'cached':'uncached'}" id="dlb-${gi}" title="${isCached?'Downloaded':'Download for offline'}" onclick="event.stopPropagation();dlTrack(${gi})">
+        ${isCached
+          ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`
+          : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`
+        }
+      </button>
       <button class="trk-btn" title="Add to playlist" onclick="event.stopPropagation();openCtxBtn(event,${gi})">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       </button>
@@ -677,8 +726,10 @@ function start(gi) {
     if (cached) {
       src = cached;
     } else {
-      // Play live and cache in background for next time
-      cacheUrl(t.file);
+      // Play live and cache in background, then refresh icons
+      cacheUrl(t.file).then(ok => {
+        if (ok) { cachedFiles.add(t.file); renderLibrary(); if (activePl) renderPlTracks(); }
+      });
     }
     audio.src = src;
     audio.playbackRate = speeds[spIdx];
@@ -741,18 +792,30 @@ function toggleShuffle() {
 }
 
 function cycleRepeat() {
+  // 0=off  1=repeat-all  2=repeat-once
   repeat=(repeat+1)%3;
-  document.getElementById('btnRepeat').classList.toggle('on',repeat>0);
-  toast(['Repeat off','🔁 Repeat all','🔂 Repeat one'][repeat]);
+  const btn=document.getElementById('btnRepeat');
+  const one=document.getElementById('repeatOne');
+  btn.classList.toggle('on', repeat>0);
+  // mode 2 = repeat once → show "1" inside icon
+  if (one) one.style.display = repeat===2 ? 'inline' : 'none';
+  btn.title = ['No Repeat','Repeat All','Repeat Once'][repeat];
+  toast(['Repeat off','🔁 Repeat all','🔂 Repeat once'][repeat]);
 }
 
-function cycleSpeed() {
-  spIdx=(spIdx+1)%speeds.length;
-  audio.playbackRate=speeds[spIdx];
-  document.getElementById('speedPill').textContent=speeds[spIdx]+'×';
-  localStorage.setItem('mp_sp',spIdx);
+function changeSpeed(dir) {
+  spIdx = Math.max(0, Math.min(speeds.length-1, spIdx+dir));
+  audio.playbackRate = speeds[spIdx];
+  document.getElementById('speedPill').textContent = speeds[spIdx]+'×';
+  // dim tortoise when at min, rabbit when at max
+  document.getElementById('speedSlower').style.opacity = spIdx===0 ? '0.3' : '1';
+  document.getElementById('speedFaster').style.opacity = spIdx===speeds.length-1 ? '0.3' : '1';
+  localStorage.setItem('mp_sp', spIdx);
   toast('Speed: '+speeds[spIdx]+'×');
 }
+
+// keep cycleSpeed alias in case anything else calls it
+function cycleSpeed() { changeSpeed(1); }
 
 function toggleMute() {
   muted=!muted; audio.muted=muted;
@@ -860,6 +923,7 @@ function renderPlTracks() {
     const t=gi>=0?tracks[gi]:{title:fn,name:fn,file:'Database/'+fn};
     const isNow=nowTrack&&nowTrack.name===fn;
     const dur=durations[t.file]?fmt(durations[t.file]):'—';
+    const isCached=cachedFiles.has(t.file);
     return `<div class="track-row pl-row${isNow?' playing':''}" data-pi="${i}" draggable="true"
       ondragstart="dStart(event,${i})" ondragover="dOver(event,${i})" ondrop="dDrop(event,${i})" ondragend="dEnd()"
       onclick="playPlAt(${i})">
@@ -873,6 +937,12 @@ function renderPlTracks() {
       </div></div>
       <div class="trk-info"><div class="trk-name">${t.title}</div><div class="trk-meta">${fn.replace(/\.ganuman$/i,"")}</div></div>
       <div class="trk-dur" id="pd-${gi>=0?gi:'x'+i}">${dur}</div>
+      <button class="dl-btn ${isCached?'cached':'uncached'}" id="dlb-pl-${i}" title="${isCached?'Downloaded':'Download for offline'}" onclick="event.stopPropagation();dlTrackByFile('${t.file}')">
+        ${isCached
+          ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`
+          : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`
+        }
+      </button>
       <button class="trk-btn" title="Remove" onclick="event.stopPropagation();rmFromPl('${activePl}','${fn}')">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
@@ -1224,6 +1294,15 @@ function toast(msg) {
 ═══════════════════════════════════ */
 const CACHE_NAME = 'musicpro-audio-v1';
 
+async function refreshCachedFiles() {
+  cachedFiles.clear();
+  try {
+    const cache = await caches.open(CACHE_NAME);
+    const keys  = await cache.keys();
+    keys.forEach(r => cachedFiles.add(new URL(r.url).pathname.replace(/^\//,'')));
+  } catch(e) {}
+}
+
 async function getCachedUrl(url) {
   try {
     const cache = await caches.open(CACHE_NAME);
@@ -1240,10 +1319,62 @@ async function cacheUrl(url) {
   try {
     const cache = await caches.open(CACHE_NAME);
     const existing = await cache.match(url);
-    if (existing) return; // already cached
+    if (existing) return true;
     const resp = await fetch(url);
-    if (resp.ok) await cache.put(url, resp.clone());
+    if (resp.ok) { await cache.put(url, resp.clone()); return true; }
   } catch(e) { console.warn('Cache write failed', e); }
+  return false;
+}
+
+// Download a single track by library index
+async function dlTrack(gi) {
+  const t = tracks[gi];
+  if (!t) return;
+  const btn = document.getElementById('dlb-'+gi);
+  if (btn) { btn.className='dl-btn downloading'; btn.title='Downloading…'; }
+  const ok = await cacheUrl(t.file);
+  if (ok) {
+    cachedFiles.add(t.file);
+    toast(`✅ "${t.title}" saved offline`);
+  } else {
+    toast(`❌ Download failed`);
+  }
+  renderLibrary();
+  if (activePl) renderPlTracks();
+  updateCacheStatus();
+}
+
+// Download a track by file path (used from playlist view)
+async function dlTrackByFile(filePath) {
+  const gi = tracks.findIndex(t => t.file === filePath);
+  if (gi >= 0) { await dlTrack(gi); return; }
+  // track not in library index — download directly
+  const ok = await cacheUrl(filePath);
+  if (ok) { cachedFiles.add(filePath); toast('✅ Saved offline'); }
+  else toast('❌ Download failed');
+  if (activePl) renderPlTracks();
+  updateCacheStatus();
+}
+
+// Download all tracks in current playlist
+async function downloadPlaylist() {
+  const pl = playlists.find(p=>p.id===activePl);
+  if (!pl||!pl.tracks.length) { toast('Playlist is empty'); return; }
+  const btn = document.getElementById('plDlBtn');
+  if (btn) btn.style.color='var(--gold)';
+  toast(`⬇️ Downloading ${pl.tracks.length} tracks…`);
+  let done=0;
+  for (const fn of pl.tracks) {
+    const t = tracks.find(t=>t.name===fn) || {file:'Database/'+fn};
+    const ok = await cacheUrl(t.file);
+    if (ok) cachedFiles.add(t.file);
+    done++;
+    toast(`⬇️ ${done}/${pl.tracks.length} downloaded…`);
+  }
+  if (btn) btn.style.color='var(--green)';
+  toast(`✅ ${pl.tracks.length} tracks saved offline`);
+  renderPlTracks();
+  updateCacheStatus();
 }
 
 async function updateCacheStatus() {
@@ -1254,7 +1385,7 @@ async function updateCacheStatus() {
     const cache = await caches.open(CACHE_NAME);
     const keys  = await cache.keys();
     if (keys.length === 0) {
-      dot.className = 'sdot'; msg.textContent = 'No tracks cached yet — plays will be cached automatically.';
+      dot.className = 'sdot'; msg.textContent = 'No tracks downloaded yet — tap ⬇️ on any track.';
     } else {
       let bytes = 0;
       for (const req of keys) {
@@ -1263,32 +1394,21 @@ async function updateCacheStatus() {
       }
       const mb = (bytes / 1024 / 1024).toFixed(1);
       dot.className = 'sdot ok';
-      msg.textContent = `${keys.length} track${keys.length!==1?'s':''} cached · ${mb} MB used`;
+      msg.textContent = `${keys.length} track${keys.length!==1?'s':''} downloaded · ${mb} MB`;
     }
   } catch(e) { dot.className='sdot err'; msg.textContent='Cache API not available in this browser'; }
 }
 
 async function clearAudioCache() {
-  if (!confirm('Delete all cached audio? Tracks will re-download on next play.')) return;
+  if (!confirm('Delete all downloaded tracks? They will need to be re-downloaded.')) return;
   try {
     await caches.delete(CACHE_NAME);
-    toast('🗑️ Cache cleared');
+    cachedFiles.clear();
+    toast('🗑️ All downloads cleared');
+    renderLibrary();
+    if (activePl) renderPlTracks();
     updateCacheStatus();
-  } catch(e) { toast('❌ Could not clear cache'); }
-}
-
-async function cacheAllTracks() {
-  if (!tracks.length) { toast('⚠️ No tracks loaded yet'); return; }
-  toast('⬇️ Caching all tracks… this may take a while');
-  let done = 0;
-  for (const t of tracks) {
-    await cacheUrl(t.file);
-    done++;
-    const msg = document.getElementById('cacheMsg');
-    if (msg) msg.textContent = `Caching… ${done}/${tracks.length}`;
-  }
-  toast(`✅ ${tracks.length} tracks cached!`);
-  updateCacheStatus();
+  } catch(e) { toast('❌ Could not clear downloads'); }
 }
 
 // Call on settings view open
