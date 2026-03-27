@@ -722,12 +722,21 @@ function unloadAudio() {
   audio.load();
 }
 
+// _playSrc: assign a ready src to the audio element and play.
+// Called both by start() (plain mp3) and startWithDecrypt() (already-decrypted blob).
+// unloadAudio() must have been called by the caller BEFORE reaching here.
+function _playSrc(src) {
+  audio.src = src;
+  audio.playbackRate = speeds[spIdx];
+  audio.load();
+  audio.play().then(()=>setPlay(true)).catch(()=>{ toast('⚠️ Cannot play file — check path'); setPlay(false); });
+}
+
 function start(gi) {
   const t = tracks[gi];
   if (!t) return;
   nowTrack = t;
 
-  // Try serving from Cache API first, then fetch & cache in background
   (async () => {
     unloadAudio(); // release previous WebMediaPlayer before creating a new one
     let src = t.file;
@@ -740,10 +749,7 @@ function start(gi) {
         if (ok) { cachedFiles.add(t.file); renderLibrary(); if (activePl) renderPlTracks(); }
       });
     }
-    audio.src = src;
-    audio.playbackRate = speeds[spIdx];
-    audio.load();
-    audio.play().then(()=>setPlay(true)).catch(()=>{ toast('⚠️ Cannot play file — check path'); setPlay(false); });
+    _playSrc(src);
   })();
 
   document.getElementById('nowArt').textContent  = '🎓';
@@ -1528,7 +1534,7 @@ async function startWithDecrypt(gi) {
 
       window._blobUrls[gi] = burl;
 
-      // Revoke this blob only AFTER the audio element has loaded it —
+      // Revoke old blobs only AFTER audio has loaded the new one —
       // revoking early causes ERR_FILE_NOT_FOUND on the blob URL.
       audio.addEventListener('canplay', () => {
         Object.keys(window._blobUrls).forEach(k => {
@@ -1539,10 +1545,20 @@ async function startWithDecrypt(gi) {
         });
       }, { once: true });
 
-      const orig = t.file;
-      t.file = burl;
-      _origStart(gi);
-      t.file = orig;
+      // Update UI metadata (same as start() does, minus the audio setup)
+      nowTrack = t;
+      document.getElementById('nowArt').textContent  = '🎓';
+      document.getElementById('nowTitle').textContent = t.title;
+      document.getElementById('nowSub').textContent   = t.name.replace(/\.ganuman$/i,'');
+      updateMS(t);
+      renderLibrary();
+      if (activePl) renderPlTracks();
+      updateHeart();
+
+      // _playSrc plays the already-decrypted blob directly.
+      // unloadAudio() was already called at the top of this function —
+      // do NOT call _origStart/start again or it will double-unload and kill playback.
+      _playSrc(burl);
       return;
     } catch(e) {
       console.error(e);
@@ -1550,7 +1566,29 @@ async function startWithDecrypt(gi) {
       return;
     }
   }
-  _origStart(gi);
+  // Plain mp3 — unloadAudio already called above, just resolve src and play.
+  (async () => {
+    const t2 = tracks[gi];
+    if (!t2) return;
+    nowTrack = t2;
+    let src = t2.file;
+    const cached = await getCachedUrl(t2.file);
+    if (cached) {
+      src = cached;
+    } else {
+      cacheUrl(t2.file).then(ok => {
+        if (ok) { cachedFiles.add(t2.file); renderLibrary(); if (activePl) renderPlTracks(); }
+      });
+    }
+    document.getElementById('nowArt').textContent   = '🎓';
+    document.getElementById('nowTitle').textContent = t2.title;
+    document.getElementById('nowSub').textContent   = t2.name.replace(/\.ganuman$/i,'');
+    updateMS(t2);
+    renderLibrary();
+    if (activePl) renderPlTracks();
+    updateHeart();
+    _playSrc(src);
+  })();
 }
 window.start = startWithDecrypt;
 
