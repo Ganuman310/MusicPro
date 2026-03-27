@@ -1324,32 +1324,41 @@ async function getCachedUrl(url) {
   return null;
 }
 
+// Fetch a URL to a complete ArrayBuffer, retrying up to `tries` times.
+// Handles GitHub Pages returning 206 Partial Content and HTTP/2 ping failures
+// by always reading the full body and wrapping it — never relying on the
+// server to honour a Range-less request.
+async function fetchFullBuffer(url, tries = 3) {
+  let lastErr;
+  for (let i = 0; i < tries; i++) {
+    try {
+      const resp = await fetch(url, { cache: 'no-store' });
+      // Accept 200 or 206 — both carry the audio bytes we need
+      if (!resp.ok && resp.status !== 206) {
+        throw new Error('HTTP ' + resp.status);
+      }
+      const buf = await resp.arrayBuffer();
+      if (buf.byteLength === 0) throw new Error('Empty response');
+      return { buf, ct: resp.headers.get('Content-Type') || 'application/octet-stream' };
+    } catch(e) {
+      lastErr = e;
+      // Brief back-off before retry (0 ms on first retry, 800 ms on second)
+      if (i < tries - 1) await new Promise(r => setTimeout(r, i * 800));
+    }
+  }
+  throw lastErr;
+}
+
 async function cacheUrl(url) {
   try {
     const cache = await caches.open(CACHE_NAME);
-    const existing = await cache.match(url);
-    if (existing) return true;
-    // Fetch without Range headers so we always get a full 200 response.
-    // GitHub Pages / CDNs sometimes return 206 Partial Content for audio
-    // files, which the Cache API refuses to store.
-    const resp = await fetch(url, {
-      headers: { Range: '' },   // override any implicit Range the browser adds
-      cache: 'no-store'
-    });
-    if (!resp.ok && resp.status !== 206) return false;
-    // If we still got a 206, read the body and wrap it in a synthetic 200
-    // so the Cache API accepts it.
-    if (resp.status === 206 || !resp.ok) {
-      const buf = await resp.arrayBuffer();
-      const ct = resp.headers.get('Content-Type') || 'application/octet-stream';
-      const full = new Response(buf, {
-        status: 200,
-        headers: { 'Content-Type': ct, 'Content-Length': String(buf.byteLength) }
-      });
-      await cache.put(url, full);
-    } else {
-      await cache.put(url, resp);
-    }
+    if (await cache.match(url)) return true;
+    const { buf, ct } = await fetchFullBuffer(url);
+    // Always store as a synthetic 200 — Cache API rejects 206 responses
+    await cache.put(url, new Response(buf, {
+      status: 200,
+      headers: { 'Content-Type': ct, 'Content-Length': String(buf.byteLength) }
+    }));
     return true;
   } catch(e) { console.warn('Cache write failed', e); }
   return false;
@@ -1497,7 +1506,7 @@ async function startWithDecrypt(gi) {
         }
       });
 
-      // Try cache first
+      // Try cache first, fall back to fetchFullBuffer (handles 206 + retries)
       let buf;
       const cache = await caches.open(CACHE_NAME);
       const cached = await cache.match(t.file);
@@ -1505,12 +1514,13 @@ async function startWithDecrypt(gi) {
         // Clone before reading so the cached Response body is never consumed
         buf = await cached.clone().arrayBuffer();
       } else {
-        const resp = await fetch(t.file);
-        if (!resp.ok) { toast('❌ File not found: ' + t.name); return; }
-        // Clone before reading so we still have a pristine Response to store
-        const respToCache = resp.clone();
-        buf = await resp.arrayBuffer();
-        cache.put(t.file, respToCache);
+        const { buf: fetched, ct } = await fetchFullBuffer(t.file);
+        buf = fetched;
+        // Store as synthetic 200 so Cache API accepts it
+        cache.put(t.file, new Response(buf.slice(0), {
+          status: 200,
+          headers: { 'Content-Type': ct, 'Content-Length': String(buf.byteLength) }
+        }));
       }
 
       const burl = await _gmDecrypt(buf);
