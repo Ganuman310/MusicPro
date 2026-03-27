@@ -714,6 +714,14 @@ function playPlaylist() {
   start(queue[0]);
 }
 
+// Fully unload the audio element so Chrome releases the WebMediaPlayer.
+// Must be called before setting a new src to avoid hitting the ~75-player cap.
+function unloadAudio() {
+  audio.pause();
+  audio.src = '';
+  audio.load();
+}
+
 function start(gi) {
   const t = tracks[gi];
   if (!t) return;
@@ -721,6 +729,7 @@ function start(gi) {
 
   // Try serving from Cache API first, then fetch & cache in background
   (async () => {
+    unloadAudio(); // release previous WebMediaPlayer before creating a new one
     let src = t.file;
     const cached = await getCachedUrl(t.file);
     if (cached) {
@@ -1474,10 +1483,19 @@ const _origStart = start;
 async function startWithDecrypt(gi) {
   const t = tracks[gi];
   if (!t) return;
+
+  unloadAudio(); // release old WebMediaPlayer before anything else
+
   if (t.file.toLowerCase().endsWith('.ganuman')) {
     try {
-      Object.values(window._blobUrls).forEach(u => URL.revokeObjectURL(u));
-      window._blobUrls = {};
+      // Revoke only blobs that are NOT the current track —
+      // the current one may still be in use by the audio element.
+      Object.keys(window._blobUrls).forEach(k => {
+        if (Number(k) !== gi) {
+          URL.revokeObjectURL(window._blobUrls[k]);
+          delete window._blobUrls[k];
+        }
+      });
 
       // Try cache first
       let buf;
@@ -1492,13 +1510,25 @@ async function startWithDecrypt(gi) {
         // Clone before reading so we still have a pristine Response to store
         const respToCache = resp.clone();
         buf = await resp.arrayBuffer();
-        // Cache the encrypted file for next time
         cache.put(t.file, respToCache);
       }
 
       const burl = await _gmDecrypt(buf);
       if (!burl) { toast('❌ Invalid .ganuman file'); return; }
+
       window._blobUrls[gi] = burl;
+
+      // Revoke this blob only AFTER the audio element has loaded it —
+      // revoking early causes ERR_FILE_NOT_FOUND on the blob URL.
+      audio.addEventListener('canplay', () => {
+        Object.keys(window._blobUrls).forEach(k => {
+          if (Number(k) !== gi) {
+            URL.revokeObjectURL(window._blobUrls[k]);
+            delete window._blobUrls[k];
+          }
+        });
+      }, { once: true });
+
       const orig = t.file;
       t.file = burl;
       _origStart(gi);
