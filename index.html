@@ -21,7 +21,7 @@
   --sidebar:240px;--player:90px;
   --font:'Outfit',sans-serif;--mono:'JetBrains Mono',monospace;
 }
-html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;overflow:hidden}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);font-size:16px;overflow:hidden}
 ::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
 
@@ -381,6 +381,16 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border:none;border-ra
       </div>
 
       <div class="s-card">
+        <h3>📥 Offline Cache</h3>
+        <p>Tracks are automatically cached when played so they work offline and load instantly — stored permanently until you clear them here.</p>
+        <div class="sync-row" style="margin-bottom:12px"><span class="sdot" id="cacheDot"></span><span id="cacheMsg">Calculating…</span></div>
+        <div class="btn-row">
+          <button class="btn-p" onclick="cacheAllTracks()">⬇️ Cache All Tracks Now</button>
+          <button class="btn-s" style="border-color:var(--red);color:var(--red)" onclick="clearAudioCache()">🗑️ Clear Cache</button>
+        </div>
+      </div>
+
+      <div class="s-card">
         <h3>📂 Auto-Scan Database Folder</h3>
         <p>MusicPro automatically reads all <code>.ganuman</code> and <code>.mp3</code> files from your <code>MusicPro/Database/</code> folder on GitHub. Enter your GitHub username and repo name, then click <strong>Scan &amp; Load</strong>. Tracks reload automatically on each visit if configured.</p>
         <div class="inp-label">GITHUB USERNAME</div>
@@ -524,6 +534,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   initEmojiGrid();
   renderSidebar();
+  // Init cache status (lazy — only reads when needed)
+  updateCacheStatus();
 });
 
 /* ═══════════════════════════════════
@@ -656,10 +668,23 @@ function start(gi) {
   const t = tracks[gi];
   if (!t) return;
   nowTrack = t;
-  audio.src = t.file;
-  audio.playbackRate = speeds[spIdx];
-  audio.load();
-  audio.play().then(()=>setPlay(true)).catch(()=>{ toast('⚠️ Cannot play file — check path'); setPlay(false); });
+
+  // Try serving from Cache API first, then fetch & cache in background
+  (async () => {
+    let src = t.file;
+    const cached = await getCachedUrl(t.file);
+    if (cached) {
+      src = cached;
+    } else {
+      // Play live and cache in background for next time
+      cacheUrl(t.file);
+    }
+    audio.src = src;
+    audio.playbackRate = speeds[spIdx];
+    audio.load();
+    audio.play().then(()=>setPlay(true)).catch(()=>{ toast('⚠️ Cannot play file — check path'); setPlay(false); });
+  })();
+
   document.getElementById('nowArt').textContent  = '🎓';
   document.getElementById('nowTitle').textContent = t.title;
   document.getElementById('nowSub').textContent   = t.name.replace(/\.ganuman$/i,'');
@@ -1194,6 +1219,83 @@ function toast(msg) {
 }
 
 /* ═══════════════════════════════════
+   AUDIO CACHE  (Cache API — persists until cleared)
+═══════════════════════════════════ */
+const CACHE_NAME = 'musicpro-audio-v1';
+
+async function getCachedUrl(url) {
+  try {
+    const cache = await caches.open(CACHE_NAME);
+    const match = await cache.match(url);
+    if (match) {
+      const blob = await match.blob();
+      return URL.createObjectURL(blob);
+    }
+  } catch(e) { console.warn('Cache read failed', e); }
+  return null;
+}
+
+async function cacheUrl(url) {
+  try {
+    const cache = await caches.open(CACHE_NAME);
+    const existing = await cache.match(url);
+    if (existing) return; // already cached
+    const resp = await fetch(url);
+    if (resp.ok) await cache.put(url, resp.clone());
+  } catch(e) { console.warn('Cache write failed', e); }
+}
+
+async function updateCacheStatus() {
+  const dot = document.getElementById('cacheDot');
+  const msg = document.getElementById('cacheMsg');
+  if (!dot || !msg) return;
+  try {
+    const cache = await caches.open(CACHE_NAME);
+    const keys  = await cache.keys();
+    if (keys.length === 0) {
+      dot.className = 'sdot'; msg.textContent = 'No tracks cached yet — plays will be cached automatically.';
+    } else {
+      let bytes = 0;
+      for (const req of keys) {
+        const resp = await cache.match(req);
+        if (resp) { const buf = await resp.arrayBuffer(); bytes += buf.byteLength; }
+      }
+      const mb = (bytes / 1024 / 1024).toFixed(1);
+      dot.className = 'sdot ok';
+      msg.textContent = `${keys.length} track${keys.length!==1?'s':''} cached · ${mb} MB used`;
+    }
+  } catch(e) { dot.className='sdot err'; msg.textContent='Cache API not available in this browser'; }
+}
+
+async function clearAudioCache() {
+  if (!confirm('Delete all cached audio? Tracks will re-download on next play.')) return;
+  try {
+    await caches.delete(CACHE_NAME);
+    toast('🗑️ Cache cleared');
+    updateCacheStatus();
+  } catch(e) { toast('❌ Could not clear cache'); }
+}
+
+async function cacheAllTracks() {
+  if (!tracks.length) { toast('⚠️ No tracks loaded yet'); return; }
+  toast('⬇️ Caching all tracks… this may take a while');
+  let done = 0;
+  for (const t of tracks) {
+    await cacheUrl(t.file);
+    done++;
+    const msg = document.getElementById('cacheMsg');
+    if (msg) msg.textContent = `Caching… ${done}/${tracks.length}`;
+  }
+  toast(`✅ ${tracks.length} tracks cached!`);
+  updateCacheStatus();
+}
+
+// Call on settings view open
+document.querySelectorAll('[data-v="settings"]').forEach(btn =>
+  btn.addEventListener('click', () => setTimeout(updateCacheStatus, 100))
+);
+
+/* ═══════════════════════════════════
    ENCRYPTION / DECRYPTION  (AES-256-GCM)
    Format: magic(8) + salt(16) + iv(12) + ciphertext
 ═══════════════════════════════════ */
@@ -1235,9 +1337,22 @@ async function startWithDecrypt(gi) {
     try {
       Object.values(window._blobUrls).forEach(u => URL.revokeObjectURL(u));
       window._blobUrls = {};
-      const resp = await fetch(t.file);
-      if (!resp.ok) { toast('❌ File not found: ' + t.name); return; }
-      const buf  = await resp.arrayBuffer();
+
+      // Try cache first
+      let buf;
+      const cache = await caches.open(CACHE_NAME);
+      const cached = await cache.match(t.file);
+      if (cached) {
+        buf = await cached.arrayBuffer();
+      } else {
+        const resp = await fetch(t.file);
+        if (!resp.ok) { toast('❌ File not found: ' + t.name); return; }
+        buf = await resp.arrayBuffer();
+        // Cache the encrypted file for next time
+        const cacheResp = new Response(buf.slice(0), { headers: { 'Content-Type': 'application/octet-stream' } });
+        cache.put(t.file, cacheResp);
+      }
+
       const burl = await _gmDecrypt(buf);
       if (!burl) { toast('❌ Invalid .ganuman file'); return; }
       window._blobUrls[gi] = burl;
