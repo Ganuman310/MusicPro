@@ -278,7 +278,6 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border:none;border-ra
 <aside class="sidebar">
   <div class="sidebar-logo">
     <div class="logo-mark">Music<span>Pro</span></div>
-
   </div>
   <nav class="sidebar-nav">
     <button class="nav-btn active" data-v="library" onclick="gotoView('library')">
@@ -309,12 +308,11 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border:none;border-ra
   <div class="view active" id="view-library">
     <div class="view-header">
       <div class="view-title">Your Library <span class="badge" id="libBadge">0 tracks</span></div>
-
     </div>
     <div class="toolbar">
       <div class="search-box">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        <input id="libSearch" placeholder="Search lectures…"/>
+        <input id="libSearch" placeholder="Search tracks…"/>
       </div>
     </div>
     <div class="track-head"><div>#</div><div>Title</div><div>Duration</div><div></div></div>
@@ -375,14 +373,8 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border:none;border-ra
       </div>
 
       <div class="s-card">
-        <h3>🔐 Encrypted Audio</h3>
-        <p>This player automatically decrypts <code>.ganuman</code> files from your <code>Database/</code> folder. Use the separate <strong>encrypt.html</strong> tool on your desktop to create <code>.ganuman</code> files from your MP3s, then upload them to GitHub.</p>
-        <div class="sync-row"><span class="sdot ok"></span><span>Protected mode active — .ganuman files supported</span></div>
-      </div>
-
-      <div class="s-card">
         <h3>📥 Offline Cache</h3>
-        <p>Tracks are automatically cached when played so they work offline and load instantly — stored permanently until you clear them here.</p>
+        <p>Tracks are cached when played so they work offline — stored permanently until cleared. Large files (up to 25 MB) are downloaded in chunks for reliability.</p>
         <div class="sync-row" style="margin-bottom:12px"><span class="sdot" id="cacheDot"></span><span id="cacheMsg">Calculating…</span></div>
         <div class="btn-row">
           <button class="btn-p" onclick="cacheAllTracks()">⬇️ Cache All Tracks Now</button>
@@ -392,7 +384,7 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border:none;border-ra
 
       <div class="s-card">
         <h3>📂 Auto-Scan Database Folder</h3>
-        <p>MusicPro automatically reads all <code>.ganuman</code> and <code>.mp3</code> files from your <code>MusicPro/Database/</code> folder on GitHub. Enter your GitHub username and repo name, then click <strong>Scan &amp; Load</strong>. Tracks reload automatically on each visit if configured.</p>
+        <p>MusicPro automatically reads all <code>.mp3</code> files from your <code>MusicPro/Database/</code> folder on GitHub. Enter your GitHub username and repo name, then click <strong>Scan &amp; Load</strong>. Tracks reload automatically on each visit if configured.</p>
         <div class="inp-label">GITHUB USERNAME</div>
         <input class="inp" id="ghUser" placeholder="e.g. yourname" autocomplete="off"/>
         <div class="inp-label">REPOSITORY NAME</div>
@@ -411,7 +403,7 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border:none;border-ra
 <!-- ═══ PLAYER ═══ -->
 <div class="player-bar">
   <div class="now-info">
-    <div class="now-art" id="nowArt">🎓</div>
+    <div class="now-art" id="nowArt">🎵</div>
     <div>
       <div class="now-title" id="nowTitle">No track selected</div>
       <div class="now-sub" id="nowSub">—</div>
@@ -469,8 +461,8 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border:none;border-ra
 /* ═══════════════════════════════════
    STATE
 ═══════════════════════════════════ */
-let tracks      = [];   // {file, name, title}
-let queue       = [];   // indices into tracks[]
+let tracks      = [];
+let queue       = [];
 let qPos        = -1;
 let nowTrack    = null;
 let playing     = false;
@@ -499,7 +491,6 @@ const volBar= document.getElementById('volBar');
    BOOT
 ═══════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', () => {
-  // Load saved data
   try { playlists = JSON.parse(localStorage.getItem('mp_pls')||'[]'); } catch{ playlists=[]; }
   try { favs = new Set(JSON.parse(localStorage.getItem('mp_favs')||'[]')); } catch{}
   spIdx = parseInt(localStorage.getItem('mp_sp')||'2')||2;
@@ -511,16 +502,13 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('ghGist').value  = gid;
   if (tok&&gid) { setSS('ok','Configured'); setTimeout(pullGist, 700); }
 
-  // Restore scan config
   const ghUser = localStorage.getItem('mp_ghUser')||'';
   const ghRepo = localStorage.getItem('mp_ghRepo')||'';
   if (document.getElementById('ghUser')) document.getElementById('ghUser').value = ghUser;
   if (document.getElementById('ghRepo')) document.getElementById('ghRepo').value = ghRepo;
-  // Auto-scan on load if configured
   if (ghUser && ghRepo) {
     setTimeout(() => scanDatabase(true), 900);
   } else {
-    // Fallback: try cached tracks
     try {
       const cached = JSON.parse(localStorage.getItem('mp_tracks_cache')||'[]');
       if (cached.length) { buildTracksFromList(cached); }
@@ -534,7 +522,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   initEmojiGrid();
   renderSidebar();
-  // Init cache status (lazy — only reads when needed)
   updateCacheStatus();
 });
 
@@ -543,8 +530,9 @@ document.addEventListener('DOMContentLoaded', () => {
 ═══════════════════════════════════ */
 function buildTracksFromList(filenames) {
   tracks = filenames.map(fn => {
-    const bare = fn.replace(/^Database\//i,'').replace(/^MusicPro\/Database\//i,'');
-    const title = bare.replace(/\.ganuman$/i,'').replace(/\.mp3$/i,'')
+    // Strip any path prefix, keep only the filename
+    const bare = fn.replace(/^.*[\/\\]/,'');
+    const title = bare.replace(/\.mp3$/i,'')
       .replace(/[-_]+/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
     return { file:'Database/'+bare, name:bare, title };
   });
@@ -556,11 +544,11 @@ function buildTracksFromList(filenames) {
 async function scanDatabase(silent) {
   const user = (document.getElementById('ghUser')?.value||'').trim() || localStorage.getItem('mp_ghUser')||'';
   const repo = (document.getElementById('ghRepo')?.value||'').trim() || localStorage.getItem('mp_ghRepo')||'';
-  if (!user || !repo) { toast('\u274c Enter GitHub username and repo name first'); return; }
+  if (!user || !repo) { toast('❌ Enter GitHub username and repo name first'); return; }
   localStorage.setItem('mp_ghUser', user);
   localStorage.setItem('mp_ghRepo', repo);
-  setScanStatus('', 'Scanning Database folder\u2026');
-  if (!silent) toast('\ud83d\udd0d Scanning Database folder\u2026');
+  setScanStatus('', 'Scanning Database folder…');
+  if (!silent) toast('🔍 Scanning Database folder…');
   try {
     const tok = localStorage.getItem('mp_tok')||'';
     const headers = { Accept:'application/vnd.github.v3+json' };
@@ -568,19 +556,19 @@ async function scanDatabase(silent) {
     const r = await fetch(`https://api.github.com/repos/${user}/${repo}/contents/Database`, { headers });
     if (!r.ok) {
       const msg = r.status===404 ? 'Database folder not found in repo' : 'GitHub API error '+r.status;
-      setScanStatus('err', msg); toast('\u274c '+msg); return;
+      setScanStatus('err', msg); toast('❌ '+msg); return;
     }
     const items = await r.json();
     const files = items
-      .filter(f => f.type==='file' && /\.(ganuman|mp3)$/i.test(f.name))
+      .filter(f => f.type==='file' && /\.mp3$/i.test(f.name))
       .map(f => f.name);
-    if (!files.length) { setScanStatus('err','No .ganuman or .mp3 files found in Database/'); toast('\u274c No audio files found'); return; }
+    if (!files.length) { setScanStatus('err','No .mp3 files found in Database/'); toast('❌ No audio files found'); return; }
     localStorage.setItem('mp_tracks_cache', JSON.stringify(files));
     buildTracksFromList(files);
-    setScanStatus('ok', '\u2705 '+files.length+' track'+(files.length!==1?'s':'')+' loaded from GitHub');
-    if (!silent) toast('\u2705 '+files.length+' tracks loaded!');
+    setScanStatus('ok', '✅ '+files.length+' track'+(files.length!==1?'s':'')+' loaded from GitHub');
+    if (!silent) toast('✅ '+files.length+' tracks loaded!');
   } catch(e) {
-    setScanStatus('err','Network error: '+e.message); toast('\u274c Scan failed');
+    setScanStatus('err','Network error: '+e.message); toast('❌ Scan failed');
   }
 }
 
@@ -602,7 +590,7 @@ function renderLibrary() {
   if (!list.length) {
     el.innerHTML = `<div class="empty"><div class="ico">🎧</div><p>${
       tracks.length===0
-      ? 'Open <strong>Settings &amp; Sync</strong> and add your MP3 filenames.<br>They live in <code>Database/</code> next to this HTML file.'
+      ? 'Open <strong>Settings &amp; Sync</strong> and scan your GitHub repo.<br>Your MP3s should be in a <code>Database/</code> folder.'
       : 'No results for your search.'
     }</p></div>`;
     return;
@@ -617,7 +605,7 @@ function renderLibrary() {
         <div class="eq-bar${playing?'':' p'}" style="height:100%"></div>
         <div class="eq-bar${playing?'':' p'}" style="height:45%"></div>
       </div></div>
-      <div class="trk-info"><div class="trk-name">${t.title}</div><div class="trk-meta">${t.name.replace(/\.ganuman$/i,"")}</div></div>
+      <div class="trk-info"><div class="trk-name">${t.title}</div><div class="trk-meta">${t.name.replace(/\.mp3$/i,'')}</div></div>
       <div class="trk-dur" id="ld-${gi}">${dur}</div>
       <button class="trk-btn" title="Add to playlist" onclick="event.stopPropagation();openCtxBtn(event,${gi})">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -664,30 +652,31 @@ function playPlaylist() {
   start(queue[0]);
 }
 
-function start(gi) {
+async function start(gi) {
   const t = tracks[gi];
   if (!t) return;
   nowTrack = t;
 
-  // Try serving from Cache API first, then fetch & cache in background
-  (async () => {
-    let src = t.file;
+  // Try cache first, then play live and cache in background
+  let src = t.file;
+  try {
     const cached = await getCachedUrl(t.file);
     if (cached) {
       src = cached;
     } else {
-      // Play live and cache in background for next time
+      // Play live immediately, cache in background
       cacheUrl(t.file);
     }
-    audio.src = src;
-    audio.playbackRate = speeds[spIdx];
-    audio.load();
-    audio.play().then(()=>setPlay(true)).catch(()=>{ toast('⚠️ Cannot play file — check path'); setPlay(false); });
-  })();
+  } catch(e) { /* play live if cache fails */ }
 
-  document.getElementById('nowArt').textContent  = '🎓';
+  audio.src = src;
+  audio.playbackRate = speeds[spIdx];
+  audio.load();
+  audio.play().then(()=>setPlay(true)).catch(()=>{ toast('⚠️ Cannot play file — check path'); setPlay(false); });
+
+  document.getElementById('nowArt').textContent  = '🎵';
   document.getElementById('nowTitle').textContent = t.title;
-  document.getElementById('nowSub').textContent   = t.name.replace(/\.ganuman$/i,'');
+  document.getElementById('nowSub').textContent   = t.name.replace(/\.mp3$/i,'');
   updateMS(t);
   renderLibrary();
   if (activePl) renderPlTracks();
@@ -808,7 +797,7 @@ document.addEventListener('keydown', e=>{
 function updateMS(t) {
   if (!('mediaSession' in navigator)) return;
   navigator.mediaSession.metadata = new MediaMetadata({
-    title:t.title, artist:'MusicPro', album:'Lecture Library',
+    title:t.title, artist:'MusicPro', album:'Library',
     artwork:[{src:'https://placehold.co/512x512/00d4ff/000?text=MP',sizes:'512x512',type:'image/png'}]
   });
   navigator.mediaSession.setActionHandler('play',          ()=>{ audio.play(); setPlay(true); });
@@ -856,7 +845,7 @@ function renderPlTracks() {
   }
   el.innerHTML = pl.tracks.map((fn,i)=>{
     const gi=tracks.findIndex(t=>t.name===fn);
-    const t=gi>=0?tracks[gi]:{title:fn,name:fn,file:'Database/'+fn};
+    const t=gi>=0?tracks[gi]:{title:fn.replace(/\.mp3$/i,''),name:fn,file:'Database/'+fn};
     const isNow=nowTrack&&nowTrack.name===fn;
     const dur=durations[t.file]?fmt(durations[t.file]):'—';
     return `<div class="track-row pl-row${isNow?' playing':''}" data-pi="${i}" draggable="true"
@@ -870,7 +859,7 @@ function renderPlTracks() {
         <div class="eq-bar${playing?'':' p'}" style="height:100%"></div>
         <div class="eq-bar${playing?'':' p'}" style="height:45%"></div>
       </div></div>
-      <div class="trk-info"><div class="trk-name">${t.title}</div><div class="trk-meta">${fn.replace(/\.ganuman$/i,"")}</div></div>
+      <div class="trk-info"><div class="trk-name">${t.title}</div><div class="trk-meta">${fn.replace(/\.mp3$/i,'')}</div></div>
       <div class="trk-dur" id="pd-${gi>=0?gi:'x'+i}">${dur}</div>
       <button class="trk-btn" title="Remove" onclick="event.stopPropagation();rmFromPl('${activePl}','${fn}')">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -884,7 +873,6 @@ function playPlAt(pi) {
   const pl=playlists.find(p=>p.id===activePl);
   if (!pl) return;
   const idxs=pl.tracks.map(n=>tracks.findIndex(t=>t.name===n)).filter(i=>i>=0);
-  if (!idxs[pi]===undefined) return;
   queue=idxs; qPos=pi; start(queue[qPos]);
 }
 
@@ -914,19 +902,10 @@ function deletePl(id) {
   renderSidebar();
 }
 
-function autoSync() {
-  const tok = localStorage.getItem('mp_tok');
-  const gid = localStorage.getItem('mp_gid');
-
-  if (!tok || !gid) return;
-
-  pushGist();
-}
-
 function savePls() {
   localStorage.setItem('mp_pls',JSON.stringify(playlists));
   renderSidebar();
-  autoSync();
+  doAutoSync();
 }
 
 function editPlName() {
@@ -1047,73 +1026,28 @@ function updateSleepBadge() { document.getElementById('sleepCount').textContent=
 /* ═══════════════════════════════════
    GITHUB GIST
 ═══════════════════════════════════ */
-function creds() { return { tok:document.getElementById('ghToken').value.trim(), gid:document.getElementById('ghGist').value.trim() }; }
-function setSS(state,msg) {
-  const d=document.getElementById('sdot');
-  d.className='sdot'+(state==='ok'?' ok':state==='err'?' err':'');
-  document.getElementById('smsg').textContent=msg;
-}
-async function pullGist() {
-  const tok = localStorage.getItem('mp_tok');
-  const gid = localStorage.getItem('mp_gid');
-
-  if (!tok || !gid) return;
-
-  try {
-    const res = await fetch(`https://api.github.com/gists/${gid}`, {
-      headers: {
-        "Authorization": "token " + tok
-      }
-    });
-
-    const data = await res.json();
-    const content = data.files["musicpro.json"].content;
-
-    const parsed = JSON.parse(content);
-
-    playlists = parsed.playlists || [];
-    favs = new Set(parsed.favs || []);
-
-    savePls();
-    renderLibrary();
-
-    setSS('ok', 'Pulled');
-    toast("⬇️ Loaded from GitHub");
-
-  } catch (e) {
-    setSS('err', 'Pull failed');
-    console.error(e);
-  }
-}
 function setSS(state, msg) {
   const dot = document.getElementById('sdot');
   const el  = document.getElementById('smsg');
-
   if (!dot || !el) return;
-
-  dot.className = 'sdot' + (state === 'ok' ? ' ok' : state === 'err' ? ' err' : '');
+  dot.className = 'sdot'+(state==='ok'?' ok':state==='err'?' err':'');
   el.textContent = msg;
 }
+
 function saveGist() {
   const tok = document.getElementById('ghToken').value.trim();
   const gid = document.getElementById('ghGist').value.trim();
-
-  if (!tok || !gid) {
-    toast("❌ Enter token & gist ID");
-    return;
-  }
-
+  if (!tok || !gid) { toast('❌ Enter token & gist ID'); return; }
   localStorage.setItem('mp_tok', tok);
   localStorage.setItem('mp_gid', gid);
-
   setSS('ok', 'Saved');
-
-  toast("✅ Connected to GitHub");
-
-  pushGist(); // immediate test push
+  toast('✅ Connected to GitHub');
+  pushGist();
 }
+
 async function testGist() {
-  const {tok,gid}=creds();
+  const tok = document.getElementById('ghToken').value.trim();
+  const gid = document.getElementById('ghGist').value.trim();
   if (!tok||!gid) { setSS('err','Missing token or Gist ID'); return; }
   setSS('','Testing…');
   try {
@@ -1122,56 +1056,31 @@ async function testGist() {
     else { setSS('err','Error '+r.status); toast('❌ Gist error '+r.status); }
   } catch { setSS('err','Network error'); toast('❌ Network error'); }
 }
-async function autoSync() {
-  const {tok,gid}=creds(); if (!tok||!gid) return;
-  try {
-    await fetch(`https://api.github.com/gists/${gid}`,{method:'PATCH',headers:{Authorization:`token ${tok}`,'Content-Type':'application/json'},
-      body:JSON.stringify({files:{'musicpro.json':{content:JSON.stringify({playlists},null,2)}}})});
-    setSS('ok','Synced · '+new Date().toLocaleTimeString());
-  } catch { setSS('err','Sync failed'); }
-}
+
 async function pushGist() {
   const tok = localStorage.getItem('mp_tok');
   const gid = localStorage.getItem('mp_gid');
-
-  if (!tok || !gid) {
-    toast("❌ Token or Gist missing");
-    return;
-  }
-
-  const data = {
-    playlists: playlists,
-    favs: [...favs]
-  };
-
+  if (!tok || !gid) { toast('❌ Token or Gist missing'); return; }
+  const data = { playlists, favs:[...favs] };
   try {
     const res = await fetch(`https://api.github.com/gists/${gid}`, {
-      method: "PATCH",
-      headers: {
-        "Authorization": "token " + tok,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        files: {
-          "musicpro.json": {
-            content: JSON.stringify(data, null, 2)
-          }
-        }
-      })
+      method:'PATCH',
+      headers:{ Authorization:'token '+tok, 'Content-Type':'application/json' },
+      body:JSON.stringify({ files:{ 'musicpro.json':{ content:JSON.stringify(data,null,2) } } })
     });
-
-    if (!res.ok) throw new Error("Failed");
-
-    setSS('ok', 'Synced');
-    toast("✅ Synced to GitHub");
-  } catch (e) {
-    setSS('err', 'Sync failed');
-    console.error(e);
-    toast("❌ Sync failed");
+    if (!res.ok) throw new Error('Failed');
+    setSS('ok','Synced · '+new Date().toLocaleTimeString());
+    toast('✅ Synced to GitHub');
+  } catch(e) {
+    setSS('err','Sync failed');
+    toast('❌ Sync failed');
   }
 }
+
 async function pullGist() {
-  const {tok,gid}=creds(); if (!tok||!gid) { toast('Configure token & Gist first'); return; }
+  const tok = localStorage.getItem('mp_tok')||document.getElementById('ghToken').value.trim();
+  const gid = localStorage.getItem('mp_gid')||document.getElementById('ghGist').value.trim();
+  if (!tok||!gid) { toast('Configure token & Gist first'); return; }
   setSS('','Pulling…');
   try {
     const r=await fetch(`https://api.github.com/gists/${gid}`,{headers:{Authorization:`token ${tok}`,Accept:'application/vnd.github.v3+json'}});
@@ -1181,11 +1090,20 @@ async function pullGist() {
     if (!file) { setSS('err','musicpro.json not in Gist'); toast('❌ musicpro.json missing'); return; }
     const parsed=JSON.parse(file.content||'{}');
     playlists=Array.isArray(parsed)?parsed:Array.isArray(parsed?.playlists)?parsed.playlists:[];
+    if (parsed.favs) favs=new Set(parsed.favs);
     localStorage.setItem('mp_pls',JSON.stringify(playlists));
+    localStorage.setItem('mp_favs',JSON.stringify([...favs]));
     renderSidebar();
     setSS('ok','Pulled · '+new Date().toLocaleTimeString());
     toast('⬇️ Playlists loaded from Gist');
   } catch { setSS('err','Pull error'); toast('❌ Pull failed'); }
+}
+
+function doAutoSync() {
+  const tok = localStorage.getItem('mp_tok');
+  const gid = localStorage.getItem('mp_gid');
+  if (!tok || !gid) return;
+  pushGist();
 }
 
 /* ═══════════════════════════════════
@@ -1194,9 +1112,7 @@ async function pullGist() {
 function gotoView(name) {
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-  const vmap={'library':'library','playlist':'playlist','settings':'settings'};
-  const vid=vmap[name]||name;
-  document.getElementById('view-'+vid)?.classList.add('active');
+  document.getElementById('view-'+name)?.classList.add('active');
   document.querySelector(`[data-v="${name}"]`)?.classList.add('active');
 }
 
@@ -1220,29 +1136,100 @@ function toast(msg) {
 
 /* ═══════════════════════════════════
    AUDIO CACHE  (Cache API — persists until cleared)
+   Uses streaming + chunked reads for large files up to 25 MB
 ═══════════════════════════════════ */
 const CACHE_NAME = 'musicpro-audio-v1';
+// Max size to cache: 30 MB safety margin (well above your 25 MB files)
+const MAX_CACHE_BYTES = 30 * 1024 * 1024;
 
 async function getCachedUrl(url) {
   try {
     const cache = await caches.open(CACHE_NAME);
     const match = await cache.match(url);
-    if (match) {
-      const blob = await match.blob();
-      return URL.createObjectURL(blob);
-    }
-  } catch(e) { console.warn('Cache read failed', e); }
-  return null;
+    if (!match) return null;
+    // Stream the cached response into a blob to avoid memory spikes
+    const blob = await match.blob();
+    return URL.createObjectURL(blob);
+  } catch(e) {
+    console.warn('Cache read failed', e);
+    return null;
+  }
 }
 
+/**
+ * Download a file in chunks and store it in the Cache API.
+ * Falls back to a single fetch if Range requests are not supported.
+ * Handles files up to MAX_CACHE_BYTES reliably.
+ */
 async function cacheUrl(url) {
   try {
     const cache = await caches.open(CACHE_NAME);
     const existing = await cache.match(url);
     if (existing) return; // already cached
-    const resp = await fetch(url);
-    if (resp.ok) await cache.put(url, resp.clone());
-  } catch(e) { console.warn('Cache write failed', e); }
+
+    // ── Step 1: probe the file with a HEAD request ──
+    let contentLength = 0;
+    let supportsRange  = false;
+    try {
+      const head = await fetch(url, { method:'HEAD' });
+      contentLength = parseInt(head.headers.get('content-length')||'0', 10);
+      supportsRange  = (head.headers.get('accept-ranges')||'').toLowerCase() === 'bytes';
+    } catch(_) { /* HEAD not supported — fall through to direct fetch */ }
+
+    // ── Step 2a: small file or no Range support → single fetch ──
+    if (!supportsRange || contentLength === 0 || contentLength <= 4 * 1024 * 1024) {
+      const resp = await fetch(url);
+      if (resp.ok) {
+        await cache.put(url, resp.clone());
+      }
+      return;
+    }
+
+    // ── Step 2b: large file → chunked download ──
+    const CHUNK = 2 * 1024 * 1024; // 2 MB chunks
+    const chunks = [];
+    let offset = 0;
+    let contentType = 'audio/mpeg';
+
+    while (offset < contentLength) {
+      const end = Math.min(offset + CHUNK - 1, contentLength - 1);
+      const resp = await fetch(url, {
+        headers: { Range: `bytes=${offset}-${end}` }
+      });
+      if (!resp.ok && resp.status !== 206) {
+        throw new Error(`Chunk fetch failed: ${resp.status}`);
+      }
+      if (offset === 0) {
+        contentType = resp.headers.get('content-type') || contentType;
+      }
+      const buf = await resp.arrayBuffer();
+      chunks.push(buf);
+      offset += buf.byteLength;
+    }
+
+    // Combine all chunks into one ArrayBuffer
+    const total = chunks.reduce((s, b) => s + b.byteLength, 0);
+    const combined = new Uint8Array(total);
+    let pos = 0;
+    for (const chunk of chunks) {
+      combined.set(new Uint8Array(chunk), pos);
+      pos += chunk.byteLength;
+    }
+
+    // Store as a proper Response in the cache
+    const blob = new Blob([combined], { type: contentType });
+    const cacheResp = new Response(blob, {
+      status: 200,
+      headers: {
+        'Content-Type': contentType,
+        'Content-Length': String(total)
+      }
+    });
+    await cache.put(url, cacheResp);
+
+  } catch(e) {
+    console.warn('Cache write failed for', url, e);
+  }
 }
 
 async function updateCacheStatus() {
@@ -1253,18 +1240,31 @@ async function updateCacheStatus() {
     const cache = await caches.open(CACHE_NAME);
     const keys  = await cache.keys();
     if (keys.length === 0) {
-      dot.className = 'sdot'; msg.textContent = 'No tracks cached yet — plays will be cached automatically.';
+      dot.className = 'sdot';
+      msg.textContent = 'No tracks cached yet — plays will be cached automatically.';
     } else {
       let bytes = 0;
       for (const req of keys) {
         const resp = await cache.match(req);
-        if (resp) { const buf = await resp.arrayBuffer(); bytes += buf.byteLength; }
+        if (resp) {
+          const cl = resp.headers.get('content-length');
+          if (cl) {
+            bytes += parseInt(cl, 10);
+          } else {
+            // fallback: read the blob size without loading into memory unnecessarily
+            const blob = await resp.blob();
+            bytes += blob.size;
+          }
+        }
       }
       const mb = (bytes / 1024 / 1024).toFixed(1);
       dot.className = 'sdot ok';
       msg.textContent = `${keys.length} track${keys.length!==1?'s':''} cached · ${mb} MB used`;
     }
-  } catch(e) { dot.className='sdot err'; msg.textContent='Cache API not available in this browser'; }
+  } catch(e) {
+    dot.className='sdot err';
+    msg.textContent='Cache API not available in this browser';
+  }
 }
 
 async function clearAudioCache() {
@@ -1279,113 +1279,31 @@ async function clearAudioCache() {
 async function cacheAllTracks() {
   if (!tracks.length) { toast('⚠️ No tracks loaded yet'); return; }
   toast('⬇️ Caching all tracks… this may take a while');
-  let done = 0;
+  const msgEl = document.getElementById('cacheMsg');
+  let done = 0, failed = 0;
+
   for (const t of tracks) {
-    await cacheUrl(t.file);
-    done++;
-    const msg = document.getElementById('cacheMsg');
-    if (msg) msg.textContent = `Caching… ${done}/${tracks.length}`;
+    if (msgEl) msgEl.textContent = `Caching… ${done+1}/${tracks.length} — ${t.title}`;
+    try {
+      await cacheUrl(t.file);
+      done++;
+    } catch(e) {
+      failed++;
+      console.warn('Failed to cache:', t.file, e);
+    }
   }
-  toast(`✅ ${tracks.length} tracks cached!`);
+
+  const summary = failed > 0
+    ? `✅ ${done} cached, ❌ ${failed} failed`
+    : `✅ All ${done} tracks cached!`;
+  toast(summary);
   updateCacheStatus();
 }
 
-// Call on settings view open
+// Refresh cache status when settings tab is opened
 document.querySelectorAll('[data-v="settings"]').forEach(btn =>
   btn.addEventListener('click', () => setTimeout(updateCacheStatus, 100))
 );
-
-/* ═══════════════════════════════════
-   ENCRYPTION / DECRYPTION  (AES-256-GCM)
-   Format: magic(8) + salt(16) + iv(12) + ciphertext
-═══════════════════════════════════ */
-const _GM_MAGIC = new Uint8Array([0x47,0x41,0x4E,0x55,0x4D,0x41,0x4E,0x21]); // "GANUMAN!"
-const _GM_PASS  = 'Ganu&Anu#1999! Love'; // hardcoded — only this file knows this
-
-async function _gmKey(salt) {
-  const raw = await crypto.subtle.importKey(
-    'raw', new TextEncoder().encode(_GM_PASS), 'PBKDF2', false, ['deriveKey']
-  );
-  return crypto.subtle.deriveKey(
-    { name:'PBKDF2', salt, iterations:200000, hash:'SHA-256' },
-    raw, { name:'AES-GCM', length:256 }, false, ['encrypt','decrypt']
-  );
-}
-
-async function _gmDecrypt(arrayBuffer) {
-  const d = new Uint8Array(arrayBuffer);
-  // Verify magic header
-  for (let i = 0; i < _GM_MAGIC.length; i++) {
-    if (d[i] !== _GM_MAGIC[i]) return null; // not a .ganuman file
-  }
-  let off = _GM_MAGIC.length;
-  const salt   = d.slice(off, off+16); off += 16;
-  const iv     = d.slice(off, off+12); off += 12;
-  const cipher = d.slice(off);
-  const key    = await _gmKey(salt);
-  const plain  = await crypto.subtle.decrypt({name:'AES-GCM', iv}, key, cipher);
-  return URL.createObjectURL(new Blob([plain], {type:'audio/mpeg'}));
-}
-
-// Intercept playback for .ganuman files
-window._blobUrls = {};
-const _origStart = start;
-async function startWithDecrypt(gi) {
-  const t = tracks[gi];
-  if (!t) return;
-  if (t.file.toLowerCase().endsWith('.ganuman')) {
-    try {
-      Object.values(window._blobUrls).forEach(u => URL.revokeObjectURL(u));
-      window._blobUrls = {};
-
-      // Try cache first
-      let buf;
-      const cache = await caches.open(CACHE_NAME);
-      const cached = await cache.match(t.file);
-      if (cached) {
-        buf = await cached.arrayBuffer();
-      } else {
-        const resp = await fetch(t.file);
-        if (!resp.ok) { toast('❌ File not found: ' + t.name); return; }
-        buf = await resp.arrayBuffer();
-        // Cache the encrypted file for next time
-        const cacheResp = new Response(buf.slice(0), { headers: { 'Content-Type': 'application/octet-stream' } });
-        cache.put(t.file, cacheResp);
-      }
-
-      const burl = await _gmDecrypt(buf);
-      if (!burl) { toast('❌ Invalid .ganuman file'); return; }
-      window._blobUrls[gi] = burl;
-      const orig = t.file;
-      t.file = burl;
-      _origStart(gi);
-      t.file = orig;
-      return;
-    } catch(e) {
-      console.error(e);
-      toast('❌ Could not decrypt file');
-      return;
-    }
-  }
-  _origStart(gi);
-}
-window.start = startWithDecrypt;
-
-function playLib(gi) {
-  queue = tracks.map((_,i)=>i);
-  qPos  = gi;
-  if (shuffle) shuffleQ(gi);
-  startWithDecrypt(gi);
-}
-function playPlaylist() {
-  const pl = playlists.find(p=>p.id===activePl);
-  if (!pl||!pl.tracks.length) { toast('Playlist is empty'); return; }
-  const idxs = pl.tracks.map(n=>tracks.findIndex(t=>t.name===n)).filter(i=>i>=0);
-  if (!idxs.length) { toast('⚠️ Tracks not found in library'); return; }
-  queue = idxs; qPos = 0;
-  if (shuffle) shuffleQ(idxs[0]);
-  startWithDecrypt(queue[0]);
-}
 </script>
 </body>
 </html>
