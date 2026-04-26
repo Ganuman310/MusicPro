@@ -18,7 +18,7 @@ async function signInWithGoogle() {
   const { error } = await _supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: window.location.origin + '/index.html'
+      redirectTo: window.location.href.split('?')[0].split('#')[0]  // works for any subfolder path
     }
   });
   if (error) throw error;
