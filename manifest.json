@@ -1,21 +1,26 @@
 {
   "name": "MusicPro",
   "short_name": "MusicPro",
-  "start_url": "./index.html",
+  "description": "Ganuman's Music App",
+  "start_url": "/index.html",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#080c14",
-  "theme_color": "#080c14",
-  "orientation": "portrait",
+  "orientation": "portrait-primary",
+  "background_color": "#121212",
+  "theme_color": "#121212",
+  "categories": ["education", "music"],
   "icons": [
     {
       "src": "icons/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "icons/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
