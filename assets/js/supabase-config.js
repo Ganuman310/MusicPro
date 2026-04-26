@@ -1,14 +1,15 @@
 // ── SUPABASE CONFIG ──
 // Replace these with your actual Supabase project values
 const SUPABASE_URL = 'https://dbkmfkfomfkjqojykmph.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRia21ma2ZvbWZranFvanprbXBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxODQ3ODMsImV4cCI6MjA5Mjc2MDc4M30.J3BudQ7X-mUdjGsKEdXzs9y4F75NwONjJ3mzFm92N5A';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRia21ma2ZvbWZranFvanlrbXBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxODQ3ODMsImV4cCI6MjA5Mjc2MDc4M30.J3BudQ7X-mUdjGsKEdXzs9y4F75NwONjJ3mzFm92N5A';
 
 // Initialize Supabase client (loaded via CDN in HTML)
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
     persistSession: true,        // keeps user logged in across browser restarts
     autoRefreshToken: true,      // silently refreshes token before expiry
-    detectSessionInUrl: true     // handles OAuth redirect automatically
+    detectSessionInUrl: true,    // handles OAuth redirect automatically
+    flowType: 'pkce'             // uses code flow — no tokens exposed in URL hash
   }
 });
 
@@ -18,7 +19,7 @@ async function signInWithGoogle() {
   const { error } = await _supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: window.location.origin + window.location.pathname.replace(/\/[^/]*$/, '/index.html')
+      redirectTo: window.location.origin + window.location.pathname.replace(//[^/]*$/, '/index.html')
     }
   });
   if (error) throw error;
