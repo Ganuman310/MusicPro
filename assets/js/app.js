@@ -13,6 +13,11 @@ const prog  = document.getElementById('prog');
 const volBar = document.getElementById('volBar');
 const CACHE_NAME = 'musicpro-audio-v1';
 
+// ── HARDCODED LIBRARY CONFIG ──
+const GH_USER = 'Ganuman310';
+const GH_REPO = 'MusicPro';
+const ENC_PASS = 'Ganu&Anu#1999! Love';
+
 // ── INIT ──
 document.addEventListener('DOMContentLoaded', async () => {
   // Check for existing session
@@ -99,18 +104,8 @@ async function loadUserData() {
     }));
     renderSidebar();
 
-    // Load GitHub library config
-    const ghUser = prefs?.gh_user || '';
-    const ghRepo = prefs?.gh_repo || '';
-    if (document.getElementById('ghUser')) document.getElementById('ghUser').value = ghUser;
-    if (document.getElementById('ghRepo')) document.getElementById('ghRepo').value = ghRepo;
-    if (ghUser && ghRepo) setTimeout(() => scanDatabase(true), 600);
-    else {
-      try {
-        const cached = JSON.parse(localStorage.getItem('mp_tracks_' + currentUser.id) || '[]');
-        if (cached.length) buildTracksFromList(cached);
-      } catch {}
-    }
+    // Auto-load library from hardcoded GitHub config
+    setTimeout(() => scanDatabase(true), 600);
 
     // Load encryption password silently from Supabase
     await _loadEncPass();
@@ -213,23 +208,21 @@ function buildTracksFromList(filenames) {
 }
 
 async function scanDatabase(silent) {
-  const user = (document.getElementById('ghUser')?.value || '').trim();
-  const repo = (document.getElementById('ghRepo')?.value || '').trim();
-  if (!user || !repo) { toast('❌ Enter GitHub username and repo name'); return; }
-  setScanStatus('', 'Scanning…');
-  if (!silent) toast('🔍 Scanning Database folder…');
+  if (!silent) toast('🔍 Loading library…');
   try {
-    const files = await scanGitHubDatabase(user, repo);
+    // Try localStorage cache first for instant load
+    const cached = JSON.parse(localStorage.getItem('mp_tracks') || '[]');
+    if (cached.length) buildTracksFromList(cached);
+    // Always fetch fresh list from GitHub
+    const files = await scanGitHubDatabase(GH_USER, GH_REPO);
     if (!files.length) { setScanStatus('err', 'No .ganuman files found'); return; }
-    localStorage.setItem('mp_tracks_' + currentUser.id, JSON.stringify(files));
+    localStorage.setItem('mp_tracks', JSON.stringify(files));
     buildTracksFromList(files);
     setScanStatus('ok', '✅ ' + files.length + ' tracks loaded');
     if (!silent) toast('✅ ' + files.length + ' tracks loaded!');
-    // Save to prefs
-    if (currentUser) dbSavePreferences(currentUser.id, { gh_user: user, gh_repo: repo });
   } catch (e) {
     setScanStatus('err', e.message);
-    toast('❌ Scan failed: ' + e.message);
+    if (!silent) toast('❌ Scan failed: ' + e.message);
   }
 }
 
@@ -248,7 +241,7 @@ function renderLibrary() {
   if (!list.length) {
     el.innerHTML = `<div class="empty"><div class="ico">🎧</div><p>${
       tracks.length === 0
-        ? 'Open <strong>Settings</strong> and add your GitHub username &amp; repo.'
+        ? 'Your library is loading…'
         : 'No results.'
     }</p></div>`;
     return;
@@ -737,21 +730,9 @@ let _encPass = '';
 function getEncPass() { return _encPass; }
 
 async function _loadEncPass() {
-  if (!currentUser) return;
-  try {
-    const pass = await dbGetEncPassword(currentUser.id);
-    if (pass) {
-      _encPass = pass;
-      _updateEncUI(true);
-    } else {
-      _encPass = '';
-      _updateEncUI(false);
-    }
-  } catch (e) {
-    console.error('Could not load enc password', e);
-    _encPass = '';
-    _updateEncUI(false);
-  }
+  // Password is hardcoded — no Supabase lookup needed
+  _encPass = ENC_PASS;
+  _updateEncUI(true);
 }
 
 function _updateEncUI(isSet) {
