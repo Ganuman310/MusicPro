@@ -5,14 +5,14 @@ const AUDIO_CACHE = 'musicpro-audio-v1';
 
 // App shell files to cache on install
 const SHELL_FILES = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/assets/css/style.css',
-  '/assets/js/supabase-config.js',
-  '/assets/js/app.js',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png'
+  './',
+  './index.html',
+  './manifest.json',
+  './assets/css/style.css',
+  './assets/js/supabase-config.js',
+  './assets/js/app.js',
+  './icons/icon-192.png',
+  './icons/icon-512.png'
 ];
 
 // ── INSTALL ──
@@ -81,7 +81,7 @@ self.addEventListener('fetch', e => {
       }).catch(() => {
         // Fallback to index.html for navigation requests (SPA)
         if (e.request.mode === 'navigate') {
-          return caches.match('/index.html');
+          return caches.match('./index.html');
         }
         return new Response('Offline', { status: 503 });
       });
