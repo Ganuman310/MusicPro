@@ -192,4 +192,4 @@ async function scanGitHubDatabase(user, repo, token = '') {
   return items
     .filter(f => f.type === 'file' && /\.ganuman$/i.test(f.name))
     .map(f => f.name);
-}
+
