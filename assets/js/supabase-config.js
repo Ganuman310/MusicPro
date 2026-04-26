@@ -73,7 +73,7 @@ async function dbCreatePlaylist(userId, name, emoji) {
     .from('playlists')
     .insert({ user_id: userId, name, emoji })
     .select()
-    .single();
+    .maybeSingle();
   if (error) throw error;
   return data;
 }
@@ -151,7 +151,7 @@ async function dbGetPreferences(userId) {
     .from('preferences')
     .select('*')
     .eq('user_id', userId)
-    .single();
+    .maybeSingle();
   return data;
 }
 
@@ -169,7 +169,7 @@ async function dbGetEncPassword(userId) {
     .from('preferences')
     .select('enc_password')
     .eq('user_id', userId)
-    .single();
+    .maybeSingle();
   if (error) return null;
   return data?.enc_password || null;
 }
