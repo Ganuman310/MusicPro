@@ -1,792 +1,464 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<title>MusicPro</title>
-<link rel="manifest" href="manifest.json">
-<link rel="icon" href="icons/icon-192.png">
-<meta name="theme-color" content="#080c14">
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#080c14;--surface:#0e1420;--card:#141b28;--card2:#1a2235;
-  --border:#1f2d45;--border2:#263549;
-  --accent:#00d4ff;--accent-dim:#007799;
-  --gold:#f5a623;--red:#ff4d6d;--green:#2ecc71;
-  --text:#e8edf5;--text2:#a0aec0;--text3:#4a5a72;
-  --radius:12px;--radius-sm:8px;
-  --sidebar:clamp(200px, 18vw, 260px);--player:90px;
-  --font:'Outfit',sans-serif;--mono:'JetBrains Mono',monospace;
-}
-html{font-size:clamp(17px, 1.6vw, 22px)}
-body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);font-size:1rem;overflow:hidden}
-::-webkit-scrollbar{width:4px;height:4px}
-::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
-.app{display:grid;grid-template-columns:var(--sidebar) 1fr;grid-template-rows:1fr var(--player);height:100dvh}
-.sidebar{grid-row:1;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
-.main-area{grid-row:1;display:flex;flex-direction:column;overflow:hidden}
-.player-bar{grid-column:1/3;grid-row:2;background:var(--surface);border-top:1px solid var(--border)}
-.sidebar-logo{padding:22px 20px 14px;flex-shrink:0}
-.logo-mark{font-size:1.3rem;font-weight:800;letter-spacing:-0.5px}
-.logo-mark span{color:var(--accent)}
-.sidebar-nav{padding:0 10px;flex-shrink:0}
-.nav-btn{display:flex;align-items:center;gap:10px;width:100%;padding:9px 10px;border-radius:var(--radius-sm);border:none;background:none;color:var(--text2);cursor:pointer;font-family:var(--font);font-size:0.82rem;font-weight:500;transition:all .15s;text-align:left}
-.nav-btn:hover{background:var(--card);color:var(--text)}
-.nav-btn.active{background:var(--card2);color:var(--accent)}
-.sidebar-section{padding:16px 20px 6px;font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--text3);font-family:var(--mono)}
-.playlist-list{flex:1;overflow-y:auto;padding:0 10px 6px}
-.pl-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:var(--radius-sm);cursor:pointer;transition:background .15s}
-.pl-item:hover{background:var(--card)}
-.pl-item.active{background:var(--card2)}
-.pl-dot{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:0.85rem;flex-shrink:0;background:var(--card2)}
-.pl-item.active .pl-dot{background:var(--accent);color:#000}
-.pl-name{font-size:0.82rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1}
-.pl-count{font-size:0.68rem;color:var(--text3);font-family:var(--mono)}
-.pl-del{opacity:0;background:none;border:none;color:var(--text3);cursor:pointer;padding:2px 4px;border-radius:4px;transition:opacity .15s,color .15s;line-height:1}
-.pl-item:hover .pl-del{opacity:1}
-.pl-del:hover{color:var(--red)}
-.new-pl-btn{display:flex;align-items:center;gap:8px;width:calc(100% - 20px);margin:4px 10px 12px;padding:8px 10px;border-radius:var(--radius-sm);border:1px dashed var(--border2);background:none;color:var(--text3);cursor:pointer;font-family:var(--font);font-size:0.8rem;transition:all .15s}
-.new-pl-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(0,212,255,.04)}
-.view{display:none;flex-direction:column;height:100%;overflow:hidden}
-.view.active{display:flex}
-.view-header{padding:20px 24px 0;flex-shrink:0}
-.view-title{font-size:1.4rem;font-weight:800;letter-spacing:-.5px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.badge{font-size:0.68rem;font-family:var(--mono);font-weight:400;color:var(--text3);background:var(--card);border:1px solid var(--border);border-radius:20px;padding:3px 10px}
-.view-sub{font-size:0.77rem;color:var(--text2);margin-top:3px}
-.toolbar{display:flex;align-items:center;gap:8px;padding:12px 24px 0;flex-shrink:0;flex-wrap:wrap}
-.search-box{display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:40px;padding:7px 14px;flex:1;min-width:140px}
-.search-box input{background:none;border:none;outline:none;color:var(--text);font-family:var(--font);font-size:0.82rem;width:100%}
-.search-box input::placeholder{color:var(--text3)}
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+  <meta name="theme-color" content="#121212"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="MusicPro"/>
+  <meta name="description" content="Your personal encrypted lecture library"/>
+  <title>MusicPro</title>
+  <link rel="manifest" href="manifest.json"/>
+  <link rel="apple-touch-icon" href="icons/icon-192.png"/>
+  <link rel="stylesheet" href="assets/css/style.css"/>
 
-/* ── DOWNLOAD ALL BUTTON ── */
-.dl-all-btn{display:inline-flex;align-items:center;gap:6px;padding:5px 13px;border-radius:40px;border:1px solid var(--border2);background:none;color:var(--text3);font-family:var(--font);font-size:0.72rem;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0;letter-spacing:.2px}
-.dl-all-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(0,212,255,.07);transform:scale(1.03)}
-.dl-all-btn.busy{border-color:var(--gold);color:var(--gold);pointer-events:none;animation:dlpulse .9s ease-in-out infinite alternate}
-.dl-all-btn.done{border-color:var(--green);color:var(--green);pointer-events:none}
-.dl-all-btn.done:hover{transform:none}
-
-.track-head{display:grid;grid-template-columns:36px 1fr 80px 32px 44px;gap:8px;padding:6px 10px 6px 24px;color:var(--text3);font-size:0.62rem;text-transform:uppercase;letter-spacing:1px;font-family:var(--mono);border-bottom:1px solid var(--border);margin:6px 24px 0;flex-shrink:0}
-.track-scroll{flex:1;overflow-y:auto;padding:4px 12px 8px}
-.track-row{display:grid;grid-template-columns:36px 1fr 80px 32px 44px;gap:8px;align-items:center;padding:7px 12px;border-radius:var(--radius-sm);cursor:pointer;border:1px solid transparent;transition:background .12s,border-color .12s}
-.track-row:hover{background:var(--card)}
-.track-row.playing{background:rgba(0,212,255,.06);border-color:rgba(0,212,255,.15)}
-.track-row.playing .trk-name{color:var(--accent)}
-.trk-idx{font-family:var(--mono);font-size:0.75rem;color:var(--text3);text-align:center;position:relative}
-.eq-wrap{display:none;align-items:flex-end;gap:2px;height:14px;justify-content:center}
-.track-row.playing .trk-idx .eq-wrap{display:flex}
-.track-row.playing .trk-idx .num{display:none}
-.eq-bar{width:3px;background:var(--accent);border-radius:2px;animation:eq .7s ease-in-out infinite alternate}
-.eq-bar:nth-child(2){animation-delay:.15s}.eq-bar:nth-child(3){animation-delay:.3s}
-.eq-bar.p{animation-play-state:paused}
-@keyframes eq{from{transform:scaleY(.3)}to{transform:scaleY(1)}}
-.trk-info{min-width:0}
-.trk-name{font-size:0.86rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.trk-meta{font-size:0.7rem;color:var(--text3);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.trk-dur{font-family:var(--mono);font-size:0.74rem;color:var(--text3);text-align:right}
-.trk-btn{background:none;border:none;color:var(--text3);cursor:pointer;padding:4px;border-radius:5px;display:flex;align-items:center;opacity:0;transition:opacity .12s,color .12s}
-.track-row:hover .trk-btn{opacity:1}
-.trk-btn:hover{color:var(--accent)}
-.dl-btn{background:none;border:none;cursor:pointer;padding:4px;border-radius:5px;display:flex;align-items:center;justify-content:center;transition:color .15s,transform .15s;flex-shrink:0}
-.dl-btn.cached{color:var(--green);pointer-events:none}
-.dl-btn.uncached{color:var(--text3)}
-.dl-btn.uncached:hover{color:var(--accent);transform:scale(1.15)}
-.dl-btn.downloading{color:var(--gold);animation:dlpulse .8s ease-in-out infinite alternate}
-@keyframes dlpulse{from{opacity:.4}to{opacity:1}}
-.pl-hero{display:flex;align-items:flex-end;gap:18px;padding:18px 24px 16px;flex-shrink:0;border-bottom:1px solid var(--border)}
-.pl-cover{width:88px;height:88px;border-radius:var(--radius);background:linear-gradient(135deg,var(--accent-dim),#001a28);display:flex;align-items:center;justify-content:center;font-size:2.4rem;flex-shrink:0;border:1px solid var(--border2)}
-.pl-hero-name{font-size:1.5rem;font-weight:800;letter-spacing:-.5px;outline:none}
-.pl-hero-name[contenteditable=true]{border-bottom:1px dashed var(--border2)}
-.pl-hero-meta{font-size:0.77rem;color:var(--text2);margin-top:3px}
-.pl-btns{display:flex;gap:8px;margin-top:10px;align-items:center}
-.pl-play{display:flex;align-items:center;gap:6px;padding:8px 18px;border-radius:40px;background:var(--accent);color:#000;border:none;cursor:pointer;font-family:var(--font);font-size:0.83rem;font-weight:700;transition:transform .15s,background .15s}
-.pl-play:hover{transform:scale(1.04);background:#33ddff}
-.pl-icon{width:34px;height:34px;border-radius:50%;border:1px solid var(--border2);background:none;color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
-.pl-icon:hover{border-color:var(--text2);color:var(--text)}
-.pl-head{grid-template-columns:18px 36px 1fr 80px 32px 44px}
-.pl-row{grid-template-columns:18px 36px 1fr 80px 32px 44px}
-.drag-handle{color:var(--text3);opacity:0;transition:opacity .12s;cursor:grab;display:flex;align-items:center}
-.track-row:hover .drag-handle{opacity:1}
-.track-row.drag-over{border-color:var(--accent)!important}
-.settings-scroll{flex:1;overflow-y:auto;padding:16px 24px}
-.s-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:14px}
-.s-card h3{font-size:0.95rem;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:8px}
-.s-card p{font-size:0.78rem;color:var(--text2);line-height:1.65;margin-bottom:12px}
-.s-card ol{font-size:0.78rem;color:var(--text2);line-height:1.9;padding-left:18px;margin-bottom:14px}
-.s-card ol li code{background:var(--card2);border:1px solid var(--border2);border-radius:4px;padding:1px 6px;font-family:var(--mono);font-size:0.74rem;color:var(--accent)}
-.inp-label{font-size:0.68rem;color:var(--text3);font-family:var(--mono);letter-spacing:.5px;margin-bottom:5px}
-.inp{background:var(--card2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:9px 12px;color:var(--text);font-family:var(--mono);font-size:0.82rem;outline:none;width:100%;transition:border-color .15s;margin-bottom:10px}
-.inp:focus{border-color:var(--accent)}
-.inp::placeholder{color:var(--text3)}
-.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
-.btn-p{padding:9px 18px;border-radius:var(--radius-sm);background:var(--accent);color:#000;border:none;cursor:pointer;font-family:var(--font);font-size:0.82rem;font-weight:700;transition:background .15s,transform .1s}
-.btn-p:hover{background:#33ddff}
-.btn-p:active{transform:scale(.97)}
-.btn-s{padding:9px 18px;border-radius:var(--radius-sm);background:none;color:var(--text2);border:1px solid var(--border2);cursor:pointer;font-family:var(--font);font-size:0.82rem;transition:all .15s}
-.btn-s:hover{border-color:var(--text2);color:var(--text)}
-.sync-row{display:flex;align-items:center;gap:6px;margin-top:10px;font-family:var(--mono);font-size:0.73rem;color:var(--text2)}
-.sdot{width:7px;height:7px;border-radius:50%;background:var(--text3);flex-shrink:0}
-.sdot.ok{background:var(--green)}.sdot.err{background:var(--red)}
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:200;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
-.overlay.open{display:flex}
-.modal{background:var(--card2);border:1px solid var(--border2);border-radius:16px;padding:26px;width:330px;max-width:92vw}
-.modal h3{font-size:1.05rem;font-weight:700;margin-bottom:5px}
-.modal p{font-size:0.78rem;color:var(--text2);margin-bottom:18px;line-height:1.55}
-.timer-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:16px}
-.timer-opt{padding:10px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:none;color:var(--text2);cursor:pointer;font-family:var(--font);font-size:0.82rem;text-align:center;transition:all .15s}
-.timer-opt:hover{border-color:var(--accent);color:var(--accent)}
-.timer-opt.on{border-color:var(--accent);background:rgba(0,212,255,.1);color:var(--accent);font-weight:600}
-.custom-row{display:flex;gap:8px;align-items:center;margin-bottom:16px}
-.custom-row input{flex:1;background:var(--card);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:8px 12px;color:var(--text);font-family:var(--mono);font-size:0.82rem;outline:none}
-.custom-row input:focus{border-color:var(--accent)}
-.emoji-grid{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
-.em-opt{width:32px;height:32px;border-radius:7px;border:1px solid var(--border2);background:none;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s}
-.em-opt:hover,.em-opt.on{border-color:var(--accent);background:rgba(0,212,255,.1)}
-.ctx{position:fixed;background:var(--card2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:4px;z-index:999;min-width:190px;box-shadow:0 8px 32px rgba(0,0,0,.5);display:none}
-.ctx.open{display:block}
-.ctx-item{padding:8px 12px;border-radius:6px;cursor:pointer;font-size:0.82rem;color:var(--text2);display:flex;align-items:center;gap:8px;transition:background .1s,color .1s}
-.ctx-item:hover{background:var(--card);color:var(--text)}
-.ctx-sep{height:1px;background:var(--border);margin:3px 0}
-.sleep-badge{position:fixed;bottom:calc(var(--player) + 10px);right:16px;background:var(--card2);border:1px solid var(--border2);border-radius:10px;padding:5px 12px;font-size:0.73rem;color:var(--gold);font-family:var(--mono);display:none;z-index:100;align-items:center;gap:6px}
-.sleep-badge.show{display:flex}
-.player-bar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:0 20px;height:var(--player);gap:10px}
-.now-info{display:flex;align-items:center;gap:12px;min-width:0}
-.now-art{width:46px;height:46px;border-radius:8px;background:linear-gradient(135deg,#003344,#001220);display:flex;align-items:center;justify-content:center;font-size:1.35rem;flex-shrink:0;border:1px solid var(--border2)}
-.now-art.spin{animation:pulse 2s ease-in-out infinite}
-@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(0,212,255,0)}50%{box-shadow:0 0 0 6px rgba(0,212,255,.12)}}
-.now-title{font-size:0.85rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:170px}
-.now-sub{font-size:0.7rem;color:var(--text3);margin-top:1px}
-.heart{background:none;border:none;color:var(--text3);cursor:pointer;padding:4px;transition:color .15s}
-.heart:hover,.heart.on{color:var(--red)}
-.controls{display:flex;flex-direction:column;align-items:center;gap:5px}
-.ctrl-row{display:flex;align-items:center;gap:14px}
-.cb{background:none;border:none;color:var(--text3);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:4px;border-radius:50%;transition:color .15s,transform .1s}
-.cb:hover{color:var(--text)}
-.cb:active{transform:scale(.88)}
-.cb.on{color:var(--accent)}
-.pb{width:36px;height:36px;border-radius:50%;background:var(--text);color:#000!important;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s}
-.pb:hover{transform:scale(1.07)}
-.prog-row{display:flex;align-items:center;gap:8px;width:330px;max-width:88vw}
-.t{font-family:var(--mono);font-size:0.65rem;color:var(--text3);min-width:28px;white-space:nowrap}
-.t:last-child{text-align:right}
-input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:3px;background:var(--border);border-radius:3px;outline:none;cursor:pointer}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:11px;height:11px;border-radius:50%;background:var(--text);cursor:pointer;opacity:0;transition:opacity .15s}
-input[type=range]:hover::-webkit-slider-thumb,input[type=range]:active::-webkit-slider-thumb{opacity:1}
-input[type=range]::-moz-range-thumb{width:11px;height:11px;border:none;border-radius:50%;background:var(--text)}
-.right-ctrl{display:flex;align-items:center;gap:8px;justify-content:flex-end}
-.vol-wrap{display:flex;align-items:center;gap:6px}
-.vol-wrap input{width:78px}
-.speed-val{background:var(--card);border:1px solid var(--border2);border-radius:6px;padding:3px 0;font-family:var(--mono);font-size:0.7rem;color:var(--text3);white-space:nowrap;width:42px;text-align:center;display:inline-block;flex-shrink:0}
-.speed-wrap{display:flex;align-items:center;gap:6px}
-.speed-btn{background:none;border:none;cursor:pointer;padding:3px;border-radius:6px;transition:transform .15s,background .15s,opacity .15s;display:flex;align-items:center;justify-content:center;color:var(--text2)}
-.speed-btn:hover{background:var(--card2);transform:scale(1.15);color:var(--text)}
-.speed-btn:active{transform:scale(.9)}
-.toast{position:fixed;bottom:calc(var(--player)+12px);left:50%;transform:translateX(-50%) translateY(8px);background:var(--card2);border:1px solid var(--border2);border-radius:10px;padding:8px 16px;font-size:0.8rem;color:var(--text);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:500;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.4)}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:50px 20px;text-align:center;color:var(--text3);gap:10px;flex:1}
-.empty .ico{font-size:2.5rem;opacity:.35}
-.empty p{font-size:0.82rem;line-height:1.75;max-width:310px}
-.empty code{background:var(--card);border:1px solid var(--border);border-radius:5px;padding:2px 7px;font-family:var(--mono);font-size:0.74rem;color:var(--accent)}
-@media(max-width:620px){
-  :root{--sidebar:0px}
-  .sidebar{display:none}
-  .app{grid-template-columns:1fr}
-  .player-bar{grid-column:1;grid-template-columns:1fr;grid-template-rows:auto auto;padding:8px 14px;gap:4px;height:auto;--player:108px}
-  .now-info{order:1}.controls{order:2;width:100%}
-  .right-ctrl{display:none}.prog-row{width:100%}
-  .view-header{padding:14px 14px 0}.toolbar{padding:10px 14px 0}.track-scroll{padding:4px 4px 8px}
-  .track-head{margin:6px 4px 0;padding:5px 8px 5px 12px}
-}
-</style>
+  <!-- Supabase JS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
 <body>
 
-<div class="sleep-badge" id="sleepBadge">🌙 <span id="sleepCount">0:00</span></div>
+<audio id="audio" preload="metadata"></audio>
 
-<div class="ctx" id="ctxMenu">
-  <div class="ctx-item" id="ctxPlay">▶ Play now</div>
-  <div class="ctx-item" id="ctxNext">⏭ Play next</div>
-  <div class="ctx-sep"></div>
-  <div id="ctxPls"></div>
-</div>
+<!-- ═══════════════════════════════
+     AUTH SCREEN
+═══════════════════════════════ -->
+<div id="authScreen">
+  <div class="auth-wrap">
 
-<div class="overlay" id="sleepOverlay">
-  <div class="modal">
-    <h3>😴 Sleep Timer</h3>
-    <p>Audio will fade out and stop after the chosen time.</p>
-    <div class="timer-grid">
-      <button class="timer-opt" data-m="10">10 min</button>
-      <button class="timer-opt" data-m="15">15 min</button>
-      <button class="timer-opt" data-m="20">20 min</button>
-      <button class="timer-opt" data-m="30">30 min</button>
-      <button class="timer-opt" data-m="45">45 min</button>
-      <button class="timer-opt" data-m="60">1 hour</button>
+    <!-- Left branding panel (hidden on mobile) -->
+    <div class="auth-left">
+      <div class="auth-logo-icon">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#1db954" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+      </div>
+      <div class="auth-logo-text">Music<span>Pro</span></div>
+      <p class="auth-tagline">Your personal encrypted lecture library — secure, synced, and always with you.</p>
+      <div class="auth-features">
+        <div class="auth-feat"><div class="auth-feat-dot"></div>Playlists saved to your account</div>
+        <div class="auth-feat"><div class="auth-feat-dot"></div>Works offline with downloaded tracks</div>
+        <div class="auth-feat"><div class="auth-feat-dot"></div>Encrypted .ganuman file support</div>
+        <div class="auth-feat"><div class="auth-feat-dot"></div>Syncs across all your devices</div>
+      </div>
     </div>
-    <div class="custom-row">
-      <input type="number" id="customMin" placeholder="Custom mins" min="1" max="300"/>
-      <span style="font-size:.78rem;color:var(--text2)">minutes</span>
+
+    <!-- Right form panel -->
+    <div class="auth-right">
+      <h2>Welcome back</h2>
+      <p>Sign in to access your library</p>
+
+      <button class="google-btn" onclick="handleGoogleLogin()">
+        <svg width="18" height="18" viewBox="0 0 24 24">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>
+        <span>Continue with Google</span>
+      </button>
+
+      <div class="auth-divider">
+        <div class="auth-divider-line"></div>
+        <span>or</span>
+        <div class="auth-divider-line"></div>
+      </div>
+
+      <!-- Sign-up only fields -->
+      <div id="signupFields" style="display:none;width:100%">
+        <input id="authName" class="auth-inp" type="text" placeholder="Full name" autocomplete="name"/>
+      </div>
+
+      <input id="authEmail"    class="auth-inp" type="email"    placeholder="Email address" autocomplete="email"/>
+      <input id="authPassword" class="auth-inp" type="password" placeholder="Password"      autocomplete="current-password"/>
+
+      <div id="authError"></div>
+
+      <button id="authSubmitBtn" class="auth-btn" onclick="handleEmailAuth(document.getElementById('signupFields').style.display !== 'none')">
+        Sign In
+      </button>
+
+      <p id="authToggleText" class="auth-toggle">
+        No account? <span onclick="toggleAuthMode()">Sign up free</span>
+      </p>
     </div>
-    <div class="btn-row">
-      <button class="btn-p" id="startSleep">Start</button>
-      <button class="btn-s" id="stopSleep">Stop Timer</button>
-      <button class="btn-s" id="closeSleep">Close</button>
-    </div>
+
   </div>
 </div>
 
-<div class="overlay" id="newPlOverlay">
-  <div class="modal">
-    <h3>✨ New Playlist</h3>
-    <p>Name it and pick an icon — you can rename it anytime.</p>
-    <div class="inp-label">PLAYLIST NAME</div>
-    <input class="inp" id="newPlName" placeholder="e.g. Chapter 1 – Fundamentals" maxlength="60"/>
-    <div class="inp-label">ICON</div>
-    <div class="emoji-grid" id="emojiGrid"></div>
-    <div class="btn-row">
-      <button class="btn-p" id="doCreatePl">Create</button>
-      <button class="btn-s" id="cancelPl">Cancel</button>
+<!-- ═══════════════════════════════
+     MAIN APP
+═══════════════════════════════ -->
+<div id="appScreen" style="display:none">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar">
+    <div class="sb-logo">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+      Music<span>Pro</span>
     </div>
-  </div>
-</div>
 
-<div class="app">
+    <nav class="sb-nav">
+      <button class="nav-btn active" data-v="library" onclick="gotoView('library')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+        Library
+      </button>
+      <button class="nav-btn" data-v="liked" onclick="gotoView('liked')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        Liked Songs
+      </button>
+      <button class="nav-btn" data-v="settings" onclick="gotoView('settings')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+        Settings
+      </button>
+    </nav>
 
-<aside class="sidebar">
-  <div class="sidebar-logo">
-    <div class="logo-mark">Music<span>Pro</span></div>
-  </div>
-  <nav class="sidebar-nav">
-    <button class="nav-btn active" data-v="library" onclick="gotoView('library')">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      Library
+    <div class="sb-section">Your Playlists</div>
+    <div id="plList"></div>
+
+    <button class="sb-new-pl" onclick="openNewPl()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      New Playlist
     </button>
-    <button class="nav-btn" data-v="settings" onclick="gotoView('settings')">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
-      Settings &amp; Sync
-    </button>
-    <button class="nav-btn" onclick="openSleepModal()">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-      Sleep Timer
-    </button>
-  </nav>
-  <div class="sidebar-section">Playlists</div>
-  <div class="playlist-list" id="plList"></div>
-  <button class="new-pl-btn" onclick="openNewPl()">
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-    New Playlist
-  </button>
-</aside>
 
-<main class="main-area">
+    <div class="sb-user">
+      <div class="sb-avatar user-avatar">?</div>
+      <div class="sb-uname user-name-display">Loading…</div>
+      <button class="sb-logout" onclick="handleSignOut()">Sign out</button>
+    </div>
+  </aside>
 
-  <!-- Library View -->
-  <div class="view active" id="view-library">
-    <div class="view-header">
-      <div class="view-title">
-        Your Library
-        <span class="badge" id="libBadge">0 tracks</span>
-        <!-- ═══ DOWNLOAD ALL LIBRARY BUTTON ═══ -->
-        <button class="dl-all-btn" id="dlAllLibBtn" onclick="downloadAllLibrary()" title="Download all tracks for offline playback">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+  <!-- ── MAIN CONTENT ── -->
+  <main class="main">
+
+    <!-- Library View -->
+    <div id="view-library" class="view active">
+      <div class="view-hdr">
+        <div class="view-title">
+          Your Library
+          <span id="libBadge" class="badge">0 tracks</span>
+        </div>
+      </div>
+      <div class="view-toolbar">
+        <div class="search-wrap">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#535353" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input id="libSearch" placeholder="Search lectures…"/>
+        </div>
+        <button id="dlAllLibBtn" class="dl-all-btn" onclick="downloadAllLibrary()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           Download All
         </button>
       </div>
-    </div>
-    <div class="toolbar">
-      <div class="search-box">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        <input id="libSearch" placeholder="Search lectures…"/>
+      <div class="track-thead">
+        <div>#</div><div>Title</div><div>Duration</div><div></div><div></div>
       </div>
+      <div id="libRows" class="track-list"></div>
     </div>
-    <div class="track-head"><div>#</div><div>Title</div><div>Duration</div><div title="Downloaded"></div><div></div></div>
-    <div class="track-scroll" id="libRows"></div>
-  </div>
 
-  <!-- Playlist View -->
-  <div class="view" id="view-playlist">
-    <div class="pl-hero">
-      <div class="pl-cover" id="plCover">📚</div>
-      <div>
-        <div class="pl-hero-name" id="plName">Playlist</div>
-        <div class="pl-hero-meta" id="plMeta">0 tracks</div>
-        <div class="pl-btns">
-          <button class="pl-play" onclick="playPlaylist()">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21"/></svg>Play All
-          </button>
-          <button class="pl-icon" title="Rename" onclick="editPlName()">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-          </button>
-          <button class="pl-icon" title="Add from library" onclick="gotoView('library');toast('Right-click any track → Add to playlist')">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          </button>
-          <button class="pl-icon" id="plDlBtn" title="Download all tracks in this playlist" onclick="downloadPlaylist()">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          </button>
+    <!-- Liked Songs View -->
+    <div id="view-liked" class="view">
+      <div class="view-hdr">
+        <div class="view-title">
+          Liked Songs
+          <span id="likedBadge" class="badge">0 tracks</span>
         </div>
       </div>
+      <div class="track-thead" style="margin-top:12px">
+        <div>#</div><div>Title</div><div>Duration</div><div></div><div></div>
+      </div>
+      <div id="likedRows" class="track-list"></div>
     </div>
-    <div class="track-head pl-head"><div></div><div>#</div><div>Title</div><div>Duration</div><div title="Downloaded"></div><div></div></div>
-    <div class="track-scroll" id="plRows"></div>
-  </div>
 
-  <!-- Settings View -->
-  <div class="view" id="view-settings">
-    <div class="view-header"><div class="view-title">Settings &amp; Sync</div><div class="view-sub">GitHub Gist keeps your playlists on every device</div></div>
-    <div class="settings-scroll">
-      <div class="s-card">
-        <h3>☁️ GitHub Gist Sync</h3>
-        <p>One-time setup — playlists auto-save to your private Gist after every change.</p>
-        <ol>
-          <li>Go to <code>github.com</code> → Avatar → <code>Settings</code> → <code>Developer settings</code></li>
-          <li>Click <code>Personal access tokens</code> → <code>Tokens (classic)</code> → <code>Generate new token</code></li>
-          <li>Check only the <code>gist</code> scope → copy the token</li>
-          <li>Go to <code>gist.github.com</code> → New secret Gist</li>
-          <li>Filename: <code>musicpro.json</code> · Content: <code>{}</code> · Create</li>
-          <li>Copy the Gist ID from the URL (the long hash)</li>
-        </ol>
-        <div class="inp-label">PERSONAL ACCESS TOKEN</div>
-        <input class="inp" type="password" id="ghToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off"/>
-        <div class="inp-label">GIST ID</div>
-        <input class="inp" id="ghGist" placeholder="a1b2c3d4e5f6g7h8i9j0..." autocomplete="off"/>
-        <div class="btn-row">
-          <button class="btn-p" onclick="saveGist()">Save &amp; Connect</button>
-          <button class="btn-s" onclick="testGist()">Test</button>
-          <button class="btn-s" onclick="pushGist()">Force Push</button>
-          <button class="btn-s" onclick="pullGist()">Force Pull</button>
-        </div>
-        <div class="sync-row"><span class="sdot" id="sdot"></span><span id="smsg">Not configured</span></div>
-      </div>
-      <div class="s-card">
-        <h3>🔐 Encrypted Audio</h3>
-        <p>This player automatically decrypts <code>.ganuman</code> files from your <code>Database/</code> folder. Use the separate <strong>encrypt.html</strong> tool on your desktop to create <code>.ganuman</code> files from your MP3s, then upload them to GitHub.</p>
-        <div class="sync-row"><span class="sdot ok"></span><span>Protected mode active — .ganuman files supported</span></div>
-      </div>
-      <div class="s-card">
-        <h3>📥 Offline Storage</h3>
-        <p>Tap the ⬇️ icon on any track to download it for offline playback. Downloaded tracks show a ✅ tick. Use the playlist download button to grab an entire playlist at once.</p>
-        <div class="sync-row" style="margin-bottom:12px"><span class="sdot" id="cacheDot"></span><span id="cacheMsg">Calculating…</span></div>
-        <div class="btn-row">
-          <button class="btn-s" style="border-color:var(--red);color:var(--red)" onclick="clearAudioCache()">🗑️ Clear All Downloads</button>
+    <!-- Playlist View -->
+    <div id="view-playlist" class="view">
+      <div class="pl-hdr">
+        <div class="pl-cover" id="plCover">📚</div>
+        <div class="pl-hdr-info">
+          <h2 id="plName" contenteditable="false" onclick="editPlName()">Playlist</h2>
+          <p id="plMeta" style="font-size:12px;color:var(--text3);margin-top:4px">0 tracks</p>
+          <div class="pl-hdr-actions" style="margin-top:12px">
+            <button class="pl-play-btn" onclick="playPlaylist()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21"/></svg>
+              Play All
+            </button>
+            <button class="setting-btn ghost" onclick="downloadPlaylist()">⬇ Download All</button>
+            <button class="setting-btn ghost" style="font-size:11px;opacity:.6" onclick="editPlName()">✏ Rename</button>
+          </div>
         </div>
       </div>
-      <div class="s-card">
-        <h3>📂 Auto-Scan Database Folder</h3>
-        <p>MusicPro automatically reads all <code>.ganuman</code> and <code>.mp3</code> files from your <code>MusicPro/Database/</code> folder on GitHub. Enter your GitHub username and repo name, then click <strong>Scan &amp; Load</strong>.</p>
-        <div class="inp-label">GITHUB USERNAME</div>
-        <input class="inp" id="ghUser" placeholder="e.g. yourname" autocomplete="off"/>
-        <div class="inp-label">REPOSITORY NAME</div>
-        <input class="inp" id="ghRepo" placeholder="e.g. MusicPro" autocomplete="off"/>
-        <div class="btn-row">
-          <button class="btn-p" onclick="scanDatabase()">🔍 Scan &amp; Load Tracks</button>
+      <div class="track-thead">
+        <div style="width:20px"></div><div>#</div><div>Title</div><div>Duration</div><div></div>
+      </div>
+      <div id="plRows" class="track-list"></div>
+    </div>
+
+    <!-- Settings View -->
+    <div id="view-settings" class="view">
+      <div class="settings-scroll">
+        <h1>Settings</h1>
+
+        <!-- Account -->
+        <div class="setting-section">
+          <div class="setting-section-title">Account</div>
+          <div class="setting-row">
+            <div class="profile-avatar-lg user-avatar">?</div>
+            <div class="setting-label">
+              <strong class="user-name-display">Loading…</strong>
+              <small>Signed in via Google / Email</small>
+            </div>
+            <button class="setting-btn danger" onclick="handleSignOut()">Sign Out</button>
+          </div>
         </div>
-        <div class="sync-row"><span class="sdot" id="scanDot"></span><span id="scanMsg">Not scanned yet</span></div>
+
+        <!-- Library Source -->
+        <div class="setting-section">
+          <div class="setting-section-title">Library Source</div>
+          <div class="setting-row">
+            <div class="setting-label">
+              <strong>GitHub Username</strong>
+              <small>Your GitHub account username</small>
+            </div>
+            <input id="ghUser" class="setting-input" placeholder="e.g. ganu123" autocomplete="off"/>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label">
+              <strong>Repository Name</strong>
+              <small>Repo containing Database/ folder</small>
+            </div>
+            <input id="ghRepo" class="setting-input" placeholder="e.g. my-lectures" autocomplete="off"/>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label">
+              <div style="display:flex;align-items:center;gap:8px">
+                <div id="scanDot" class="sdot"></div>
+                <span id="scanMsg" style="font-size:12px;color:var(--text2)">Not scanned yet</span>
+              </div>
+            </div>
+            <button class="setting-btn primary" onclick="scanDatabase()">Scan Library</button>
+          </div>
+        </div>
+
+        <!-- Encryption -->
+        <div class="setting-section">
+          <div class="setting-section-title">Encryption</div>
+
+          <!-- STATE A: Password already saved in Supabase -->
+          <div id="encSavedState" class="setting-row" style="display:none">
+            <div class="setting-label">
+              <strong>Decryption Password</strong>
+              <small>🔐 Saved securely in your account — fetched automatically on login. Files will decrypt silently.</small>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="setting-btn ghost" onclick="changeEncPassword()">Change</button>
+              <button class="setting-btn danger" onclick="removeEncPassword()">Remove</button>
+            </div>
+          </div>
+
+          <!-- STATE B: No password set yet -->
+          <div id="encSetupState" class="setting-row" style="display:block">
+            <div class="setting-label">
+              <strong>Set Decryption Password</strong>
+              <small>Enter the password used to encrypt your .ganuman files. It will be saved securely to your Supabase account and fetched automatically every time you log in — you will never need to type it again.</small>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <input id="encNewPassword" class="setting-input" type="password" placeholder="Enter password…" autocomplete="off" onkeydown="if(event.key==='Enter')saveEncPassword()"/>
+              <button class="setting-btn primary" onclick="saveEncPassword()">Save</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Playback -->
+        <div class="setting-section">
+          <div class="setting-section-title">Playback</div>
+          <div class="setting-row">
+            <div class="setting-label">
+              <strong>Playback Speed</strong>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <button class="setting-btn ghost" id="speedSlower" onclick="changeSpeed(-1)">−</button>
+              <span id="speedPill" class="speed-pill">1.0×</span>
+              <button class="setting-btn ghost" id="speedFaster" onclick="changeSpeed(1)">+</button>
+            </div>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label">
+              <strong>Sleep Timer</strong>
+              <small>Auto-pause after a set time</small>
+            </div>
+            <button class="setting-btn ghost" onclick="openSleepModal()">Set Timer</button>
+          </div>
+        </div>
+
+        <!-- Downloads -->
+        <div class="setting-section">
+          <div class="setting-section-title">Downloads &amp; Storage</div>
+          <div class="setting-row">
+            <div class="setting-label">
+              <div style="display:flex;align-items:center;gap:8px">
+                <div id="cacheDot" class="sdot"></div>
+                <span id="cacheMsg" style="font-size:12px;color:var(--text2)">Checking…</span>
+              </div>
+            </div>
+            <button class="setting-btn danger" onclick="clearAudioCache()">Clear Downloads</button>
+          </div>
+        </div>
+
+        <!-- About -->
+        <div class="setting-section">
+          <div class="setting-section-title">About</div>
+          <div class="setting-row">
+            <div class="setting-label"><strong>MusicPro</strong><small>Version 2.0 · PWA</small></div>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label"><strong>Install as App</strong><small>Tap Share → Add to Home Screen (iOS) or the install icon in Chrome (Android)</small></div>
+          </div>
+        </div>
+
       </div>
     </div>
-  </div>
 
-</main>
+  </main>
 
-<!-- Player -->
-<div class="player-bar">
-  <div class="now-info">
-    <div class="now-art" id="nowArt">🎓</div>
-    <div>
-      <div class="now-title" id="nowTitle">No track selected</div>
-      <div class="now-sub" id="nowSub">—</div>
-    </div>
-    <button class="heart" id="heartBtn" onclick="toggleHeart()">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+  <!-- ── MOBILE BOTTOM NAV ── -->
+  <nav class="mobile-nav" style="display:none">
+    <button class="mob-nav-btn active" data-v="library" onclick="gotoView('library');document.querySelectorAll('.mob-nav-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+      Home
     </button>
-  </div>
-  <div class="controls">
-    <div class="ctrl-row">
-      <button class="cb" id="btnShuffle" title="Shuffle" onclick="toggleShuffle()">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/></svg>
-      </button>
-      <button class="cb" title="Prev" onclick="prevTrack()">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5"/></svg>
-      </button>
-      <button class="pb" id="btnPlay" onclick="togglePlay()">
-        <svg id="iPlay" width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21"/></svg>
-        <svg id="iPause" width="15" height="15" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
-      </button>
-      <button class="cb" title="Next" onclick="nextTrack()">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
-      </button>
-      <button class="cb" id="btnRepeat" title="Repeat" onclick="cycleRepeat()">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/>
-          <polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
-          <text id="repeatOne" x="12" y="14.5" text-anchor="middle" font-size="8" font-weight="700" font-family="Outfit,sans-serif" fill="currentColor" stroke="none" style="display:none">1</text>
-        </svg>
-      </button>
-    </div>
-    <div class="prog-row">
-      <span class="t" id="elapsed">0:00</span>
-      <input type="range" id="prog" min="0" max="100" value="0" step="0.1"/>
-      <span class="t" id="durEl">0:00</span>
-    </div>
-  </div>
-  <div class="right-ctrl">
-    <button class="cb" onclick="toggleMute()">
-      <svg id="iVol" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
-      <svg id="iMute" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+    <button class="mob-nav-btn" data-v="liked" onclick="gotoView('liked');document.querySelectorAll('.mob-nav-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      Liked
     </button>
-    <div class="vol-wrap"><input type="range" id="volBar" min="0" max="1" step="0.02" value="1"/></div>
-    <div class="speed-wrap">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text3);flex-shrink:0"><path d="M12 2a10 10 0 1 1 0 20A10 10 0 0 1 12 2z"/><path d="M12 12L8 8"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><path d="M7 12h1M16 12h1M12 7v1"/></svg>
-      <button class="speed-btn" id="speedSlower" title="Slower" onclick="changeSpeed(-1)">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="8 12 12 8 16 12"/><line x1="12" y1="16" x2="12" y2="8"/></svg>
-      </button>
-      <span class="speed-val" id="speedPill">1.0×</span>
-      <button class="speed-btn" id="speedFaster" title="Faster" onclick="changeSpeed(1)">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="8 12 12 16 16 12"/><line x1="12" y1="8" x2="12" y2="16"/></svg>
+    <button class="mob-nav-btn" onclick="openNewPl()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      New List
+    </button>
+    <button class="mob-nav-btn" data-v="settings" onclick="gotoView('settings');document.querySelectorAll('.mob-nav-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+      Settings
+    </button>
+  </nav>
+
+  <!-- ── PLAYER BAR ── -->
+  <div class="player-bar">
+
+    <!-- Now Playing Info -->
+    <div class="now-info">
+      <div id="nowArt" class="now-art">🎵</div>
+      <div class="now-text">
+        <div id="nowTitle" class="now-title">Not playing</div>
+        <div id="nowSub"   class="now-sub">—</div>
+      </div>
+      <button id="heartBtn" onclick="toggleHeart()" title="Like">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
       </button>
     </div>
-    <button class="cb" title="Sleep timer" onclick="openSleepModal()">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-    </button>
+
+    <!-- Desktop Center Controls -->
+    <div class="player-center">
+      <div class="ctrl-row">
+        <button id="btnShuffle" class="ctrl-btn" title="Shuffle" onclick="toggleShuffle()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/></svg>
+        </button>
+        <button class="ctrl-btn" title="Previous" onclick="prevTrack()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5"/></svg>
+        </button>
+        <button class="play-btn" onclick="togglePlay()" title="Play/Pause">
+          <svg id="iPlay"  width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21"/></svg>
+          <svg id="iPause" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+        </button>
+        <button class="ctrl-btn" title="Next" onclick="nextTrack()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
+        </button>
+        <button id="btnRepeat" class="ctrl-btn" title="Repeat" onclick="cycleRepeat()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+          <span id="repeatOne" style="display:none;font-size:8px;position:absolute;color:var(--accent)">1</span>
+        </button>
+      </div>
+      <div class="progress-row">
+        <span id="elapsed" class="time-el">0:00</span>
+        <input id="prog" type="range" min="0" max="100" value="0"/>
+        <span id="durEl" class="time-el">0:00</span>
+      </div>
+    </div>
+
+    <!-- Desktop Right Controls -->
+    <div class="player-right">
+      <div class="sleep-badge" id="sleepBadge" onclick="openSleepModal()" title="Sleep timer active">
+        😴 <span id="sleepCount">0:00</span>
+      </div>
+      <div class="vol-wrap">
+        <button class="ctrl-btn" onclick="toggleMute()" title="Mute">
+          <svg id="iVol"  width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+          <svg id="iMute" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+        </button>
+        <input id="volBar" type="range" min="0" max="1" step="0.01" value="1"/>
+      </div>
+    </div>
+
+    <!-- Mobile mini controls -->
+    <div class="mob-player-btns" style="display:none">
+      <button class="ctrl-btn" onclick="prevTrack()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5"/></svg>
+      </button>
+      <button class="play-btn" onclick="togglePlay()">
+        <svg id="iPlay2"  width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21"/></svg>
+        <svg id="iPause2" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+      </button>
+      <button class="ctrl-btn" onclick="nextTrack()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
+      </button>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- ── CONTEXT MENU ── -->
+<div id="ctxMenu" class="ctx-menu">
+  <div id="ctxPlay"  class="ctx-item">▶ Play now</div>
+  <div id="ctxNext"  class="ctx-item">⏭ Play next</div>
+  <div class="ctx-sep"></div>
+  <div id="ctxPls"   class="ctx-pls"></div>
+</div>
+
+<!-- ── NEW PLAYLIST MODAL ── -->
+<div id="newPlOverlay" class="overlay">
+  <div class="modal">
+    <h3>New Playlist</h3>
+    <input id="newPlName" class="modal-inp" placeholder="Playlist name…" maxlength="60"/>
+    <div id="emojiGrid" class="emoji-grid"></div>
+    <div class="modal-btns">
+      <button id="cancelPl"   class="modal-btn ghost">Cancel</button>
+      <button id="doCreatePl" class="modal-btn primary">Create</button>
+    </div>
   </div>
 </div>
 
+<!-- ── SLEEP TIMER MODAL ── -->
+<div id="sleepOverlay" class="overlay">
+  <div class="modal">
+    <h3>😴 Sleep Timer</h3>
+    <div class="timer-opts">
+      <button class="timer-opt" data-m="10">10 min</button>
+      <button class="timer-opt" data-m="20">20 min</button>
+      <button class="timer-opt" data-m="30">30 min</button>
+      <button class="timer-opt" data-m="45">45 min</button>
+      <button class="timer-opt" data-m="60">60 min</button>
+      <button class="timer-opt" data-m="90">90 min</button>
+    </div>
+    <input id="customMin" class="modal-inp" type="number" placeholder="Custom minutes…" min="1" max="300"/>
+    <div class="modal-btns">
+      <button id="closeSleep" class="modal-btn ghost">Close</button>
+      <button id="stopSleep"  class="modal-btn ghost" style="color:var(--red)">Stop Timer</button>
+      <button id="startSleep" class="modal-btn primary">Start</button>
+    </div>
+  </div>
 </div>
-<div class="toast" id="toastEl"></div>
-<audio id="audio" preload="none"></audio>
 
-<script>
-let tracks=[],queue=[],qPos=-1,nowTrack=null,playing=false,shuffle=false,repeat=0,muted=false;
-let speeds=[0.5,0.75,1,1.1,1.25,1.5,1.75,2],spIdx=2;
-let playlists=[],activePl=null,durations={},sleepSecs=0,sleepTick=null,selMin=null;
-let ctxTrk=null,dragSrc=null,favs=new Set(),libQ='',cachedFiles=new Set();
-let _dlAllRunning=false;
+<!-- ── TOAST ── -->
+<div id="toastEl"></div>
 
-const audio=document.getElementById('audio');
-const prog=document.getElementById('prog');
-const volBar=document.getElementById('volBar');
-
-document.addEventListener('DOMContentLoaded',()=>{
-  try{playlists=JSON.parse(localStorage.getItem('mp_pls')||'[]')}catch{playlists=[]}
-  try{favs=new Set(JSON.parse(localStorage.getItem('mp_favs')||'[]'))}catch{}
-  spIdx=parseInt(localStorage.getItem('mp_sp')||'2')||2;
-  document.getElementById('speedPill').textContent=speeds[spIdx]+'×';
-  document.getElementById('speedSlower').style.opacity=spIdx===0?'0.3':'1';
-  document.getElementById('speedFaster').style.opacity=spIdx===speeds.length-1?'0.3':'1';
-  const tok=localStorage.getItem('mp_tok')||'';
-  const gid=localStorage.getItem('mp_gid')||'';
-  document.getElementById('ghToken').value=tok;
-  document.getElementById('ghGist').value=gid;
-  if(tok&&gid){setSS('ok','Configured');setTimeout(pullGist,700);}
-  const ghUser=localStorage.getItem('mp_ghUser')||'';
-  const ghRepo=localStorage.getItem('mp_ghRepo')||'';
-  if(document.getElementById('ghUser'))document.getElementById('ghUser').value=ghUser;
-  if(document.getElementById('ghRepo'))document.getElementById('ghRepo').value=ghRepo;
-  if(ghUser&&ghRepo){setTimeout(()=>scanDatabase(true),900);}
-  else{try{const c=JSON.parse(localStorage.getItem('mp_tracks_cache')||'[]');if(c.length)buildTracksFromList(c);}catch{}}
-  const v=parseFloat(localStorage.getItem('mp_vol')||'1');
-  audio.volume=v;volBar.value=v;setRangeStyle(volBar,v*100);setRangeStyle(prog,0);
-  initEmojiGrid();renderSidebar();
-  refreshCachedFiles().then(()=>{renderLibrary();updateDlAllBtn();});
-  updateCacheStatus();
-});
-
-function buildTracksFromList(filenames){
-  tracks=filenames.map(fn=>{
-    const bare=fn.replace(/^Database\//i,'').replace(/^MusicPro\/Database\//i,'');
-    const title=bare.replace(/\.ganuman$/i,'').replace(/\.mp3$/i,'').replace(/[-_]+/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
-    return{file:'Database/'+bare,name:bare,title};
-  });
-  tracks.sort((a,b)=>a.title.localeCompare(b.title));
-  document.getElementById('libBadge').textContent=tracks.length+' track'+(tracks.length!==1?'s':'');
-  renderLibrary();updateDlAllBtn();
-}
-
-async function scanDatabase(silent){
-  const user=(document.getElementById('ghUser')?.value||'').trim()||localStorage.getItem('mp_ghUser')||'';
-  const repo=(document.getElementById('ghRepo')?.value||'').trim()||localStorage.getItem('mp_ghRepo')||'';
-  if(!user||!repo){toast('❌ Enter GitHub username and repo name first');return;}
-  localStorage.setItem('mp_ghUser',user);localStorage.setItem('mp_ghRepo',repo);
-  setScanStatus('','Scanning Database folder…');
-  if(!silent)toast('🔍 Scanning Database folder…');
-  try{
-    const tok=localStorage.getItem('mp_tok')||'';
-    const headers={Accept:'application/vnd.github.v3+json'};
-    if(tok)headers.Authorization='token '+tok;
-    const r=await fetch(`https://api.github.com/repos/${user}/${repo}/contents/Database`,{headers});
-    if(!r.ok){const msg=r.status===404?'Database folder not found in repo':'GitHub API error '+r.status;setScanStatus('err',msg);toast('❌ '+msg);return;}
-    const items=await r.json();
-    const files=items.filter(f=>f.type==='file'&&/\.(ganuman|mp3)$/i.test(f.name)).map(f=>f.name);
-    if(!files.length){setScanStatus('err','No .ganuman or .mp3 files found in Database/');toast('❌ No audio files found');return;}
-    localStorage.setItem('mp_tracks_cache',JSON.stringify(files));
-    buildTracksFromList(files);
-    setScanStatus('ok','✅ '+files.length+' track'+(files.length!==1?'s':'')+' loaded from GitHub');
-    if(!silent)toast('✅ '+files.length+' tracks loaded!');
-  }catch(e){setScanStatus('err','Network error: '+e.message);toast('❌ Scan failed');}
-}
-function setScanStatus(state,msg){
-  const dot=document.getElementById('scanDot');const el=document.getElementById('scanMsg');
-  if(!dot||!el)return;
-  dot.className='sdot'+(state==='ok'?' ok':state==='err'?' err':'');el.textContent=msg;
-}
-
-/* ── LIBRARY RENDER ── */
-function renderLibrary(){
-  const el=document.getElementById('libRows');
-  const q=libQ.toLowerCase();
-  const list=q?tracks.filter(t=>t.title.toLowerCase().includes(q)||t.name.toLowerCase().includes(q)):tracks;
-  if(!list.length){
-    el.innerHTML=`<div class="empty"><div class="ico">🎧</div><p>${tracks.length===0?'Open <strong>Settings &amp; Sync</strong> and add your MP3 filenames.<br>They live in <code>Database/</code> next to this HTML file.':'No results for your search.'}</p></div>`;
-    return;
-  }
-  el.innerHTML=list.map((t,i)=>{
-    const gi=tracks.indexOf(t);const isNow=nowTrack&&nowTrack.file===t.file;
-    const dur=durations[t.file]?fmt(durations[t.file]):'—';const isCached=cachedFiles.has(t.file);
-    return`<div class="track-row${isNow?' playing':''}" onclick="playLib(${gi})" oncontextmenu="openCtx(event,${gi})">
-      <div class="trk-idx"><span class="num">${i+1}</span><div class="eq-wrap">
-        <div class="eq-bar${playing?'':' p'}" style="height:60%"></div>
-        <div class="eq-bar${playing?'':' p'}" style="height:100%"></div>
-        <div class="eq-bar${playing?'':' p'}" style="height:45%"></div>
-      </div></div>
-      <div class="trk-info"><div class="trk-name">${t.title}</div><div class="trk-meta">${t.name.replace(/\.ganuman$/i,"")}</div></div>
-      <div class="trk-dur" id="ld-${gi}">${dur}</div>
-      <button class="dl-btn ${isCached?'cached':'uncached'}" id="dlb-${gi}" title="${isCached?'Downloaded':'Download for offline'}" onclick="event.stopPropagation();dlTrack(${gi})">
-        ${isCached?`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`}
-      </button>
-      <button class="trk-btn" title="Add to playlist" onclick="event.stopPropagation();openCtxBtn(event,${gi})">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      </button>
-    </div>`;
-  }).join('');
-  prefetch(list);
-}
-function prefetch(list){
-  list.forEach(t=>{
-    if(durations[t.file])return;
-    const a=new Audio();a.preload='metadata';a.src=t.file;
-    a.addEventListener('loadedmetadata',()=>{
-      durations[t.file]=a.duration;const gi=tracks.indexOf(t);
-      const e1=document.getElementById('ld-'+gi);const e2=document.getElementById('pd-'+gi);
-      if(e1)e1.textContent=fmt(a.duration);if(e2)e2.textContent=fmt(a.duration);
-    });
-  });
-}
-document.getElementById('libSearch').addEventListener('input',e=>{libQ=e.target.value;renderLibrary();});
-
-/* ═══════════════════════════════════
-   DOWNLOAD ALL LIBRARY
-═══════════════════════════════════ */
-async function downloadAllLibrary(){
-  if(_dlAllRunning)return;
-  if(!tracks.length){toast('No tracks in library yet');return;}
-  const pending=tracks.filter(t=>!cachedFiles.has(t.file));
-  if(!pending.length){toast('✅ All tracks already downloaded!');return;}
-  _dlAllRunning=true;
-  const btn=document.getElementById('dlAllLibBtn');
-  btn.classList.remove('done');btn.classList.add('busy');
-  const dlIcon=`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`;
-  btn.innerHTML=dlIcon+` 0 / ${pending.length}`;
-  let done=0,failed=0;
-  for(const t of pending){
-    const ok=await cacheUrl(t.file);
-    if(ok){cachedFiles.add(t.file);done++;}else failed++;
-    btn.innerHTML=dlIcon+` ${done} / ${pending.length}`;
-    if(done%3===0||done===pending.length)toast(`⬇️ ${done}/${pending.length} downloaded…`);
-  }
-  _dlAllRunning=false;
-  btn.classList.remove('busy');
-  if(failed===0){
-    btn.classList.add('done');
-    btn.innerHTML=`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> All Downloaded`;
-    toast(`✅ All ${done} tracks saved offline!`);
-  }else{
-    btn.innerHTML=dlIcon+` Download All`;
-    toast(`⚠️ ${done} ok · ${failed} failed`);
-  }
-  renderLibrary();updateCacheStatus();
-}
-
-function updateDlAllBtn(){
-  const btn=document.getElementById('dlAllLibBtn');
-  if(!btn||_dlAllRunning)return;
-  const dlIcon=`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`;
-  const allDone=tracks.length>0&&tracks.every(t=>cachedFiles.has(t.file));
-  if(allDone){
-    btn.classList.add('done');btn.classList.remove('busy');
-    btn.innerHTML=`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> All Downloaded`;
-  }else{
-    btn.classList.remove('done','busy');
-    btn.innerHTML=dlIcon+` Download All`;
-  }
-}
-
-/* ── PLAYBACK ── */
-function unloadAudio(){audio.pause();audio.src='';audio.load();}
-function _playSrc(src){audio.src=src;audio.playbackRate=speeds[spIdx];audio.load();audio.play().then(()=>setPlay(true)).catch(()=>{toast('⚠️ Cannot play file — check path');setPlay(false);});}
-
-function start(gi){
-  const t=tracks[gi];if(!t)return;nowTrack=t;
-  (async()=>{
-    unloadAudio();let src=t.file;
-    const cached=await getCachedUrl(t.file);
-    if(cached){src=cached;}
-    else{cacheUrl(t.file).then(ok=>{if(ok){cachedFiles.add(t.file);renderLibrary();if(activePl)renderPlTracks();updateDlAllBtn();}});}
-    _playSrc(src);
-  })();
-  document.getElementById('nowArt').textContent='🎓';
-  document.getElementById('nowTitle').textContent=t.title;
-  document.getElementById('nowSub').textContent=t.name.replace(/\.ganuman$/i,'');
-  updateMS(t);renderLibrary();if(activePl)renderPlTracks();updateHeart();
-}
-function togglePlay(){if(!nowTrack&&tracks.length){playLib(0);return;}if(audio.paused){audio.play();setPlay(true);}else{audio.pause();setPlay(false);}}
-function setPlay(p){playing=p;document.getElementById('iPlay').style.display=p?'none':'inline';document.getElementById('iPause').style.display=p?'inline':'none';document.getElementById('nowArt').classList.toggle('spin',p);document.querySelectorAll('.eq-bar').forEach(b=>b.classList.toggle('p',!p));}
-function prevTrack(){if(qPos<0)return;if(audio.currentTime>3){audio.currentTime=0;return;}qPos=(qPos-1+queue.length)%queue.length;start(queue[qPos]);}
-function nextTrack(){if(repeat===2){audio.currentTime=0;audio.play();return;}if(qPos<0)return;let n=qPos+1;if(n>=queue.length){if(repeat===1)n=0;else{setPlay(false);return;}}qPos=n;start(queue[qPos]);}
-function shuffleQ(pivot){for(let i=queue.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[queue[i],queue[j]]=[queue[j],queue[i]];}if(pivot!==undefined){const p=queue.indexOf(pivot);if(p>=0){[queue[0],queue[p]]=[queue[p],queue[0]];qPos=0;}}}
-function toggleShuffle(){shuffle=!shuffle;document.getElementById('btnShuffle').classList.toggle('on',shuffle);toast(shuffle?'🔀 Shuffle on':'Shuffle off');}
-function cycleRepeat(){repeat=(repeat+1)%3;const btn=document.getElementById('btnRepeat');const one=document.getElementById('repeatOne');btn.classList.toggle('on',repeat>0);if(one)one.style.display=repeat===2?'inline':'none';btn.title=['No Repeat','Repeat All','Repeat Once'][repeat];toast(['Repeat off','🔁 Repeat all','🔂 Repeat once'][repeat]);}
-function changeSpeed(dir){spIdx=Math.max(0,Math.min(speeds.length-1,spIdx+dir));audio.playbackRate=speeds[spIdx];document.getElementById('speedPill').textContent=speeds[spIdx]+'×';document.getElementById('speedSlower').style.opacity=spIdx===0?'0.3':'1';document.getElementById('speedFaster').style.opacity=spIdx===speeds.length-1?'0.3':'1';localStorage.setItem('mp_sp',spIdx);toast('Speed: '+speeds[spIdx]+'×');}
-function cycleSpeed(){changeSpeed(1);}
-function toggleMute(){muted=!muted;audio.muted=muted;document.getElementById('iVol').style.display=muted?'none':'inline';document.getElementById('iMute').style.display=muted?'inline':'none';}
-function toggleHeart(){if(!nowTrack)return;if(favs.has(nowTrack.name))favs.delete(nowTrack.name);else favs.add(nowTrack.name);localStorage.setItem('mp_favs',JSON.stringify([...favs]));updateHeart();}
-function updateHeart(){const liked=nowTrack&&favs.has(nowTrack.name);const btn=document.getElementById('heartBtn');btn.classList.toggle('on',liked);btn.querySelector('svg').setAttribute('fill',liked?'currentColor':'none');}
-
-audio.addEventListener('timeupdate',()=>{if(!audio.duration)return;const p=(audio.currentTime/audio.duration)*100;prog.value=p;setRangeStyle(prog,p);document.getElementById('elapsed').textContent=fmt(audio.currentTime);if('mediaSession'in navigator&&!isNaN(audio.duration)){try{navigator.mediaSession.setPositionState({duration:audio.duration,playbackRate:audio.playbackRate,position:audio.currentTime});}catch{}}});
-audio.addEventListener('loadedmetadata',()=>{document.getElementById('durEl').textContent=fmt(audio.duration);if(nowTrack)durations[nowTrack.file]=audio.duration;});
-audio.addEventListener('ended',nextTrack);audio.addEventListener('play',()=>setPlay(true));audio.addEventListener('pause',()=>setPlay(false));
-prog.addEventListener('input',()=>{if(audio.duration)audio.currentTime=(prog.value/100)*audio.duration;});
-volBar.addEventListener('input',e=>{audio.volume=e.target.value;setRangeStyle(e.target,e.target.value*100);localStorage.setItem('mp_vol',e.target.value);});
-document.addEventListener('keydown',e=>{if(['INPUT','TEXTAREA'].includes(e.target.tagName))return;if(e.code==='Space'){e.preventDefault();togglePlay();}if(e.code==='ArrowRight')audio.currentTime=Math.min(audio.duration||0,audio.currentTime+10);if(e.code==='ArrowLeft')audio.currentTime=Math.max(0,audio.currentTime-10);});
-
-function updateMS(t){if(!('mediaSession'in navigator))return;navigator.mediaSession.metadata=new MediaMetadata({title:t.title,artist:'MusicPro',album:'Lecture Library',artwork:[{src:'https://placehold.co/512x512/00d4ff/000?text=MP',sizes:'512x512',type:'image/png'}]});navigator.mediaSession.setActionHandler('play',()=>{audio.play();setPlay(true);});navigator.mediaSession.setActionHandler('pause',()=>{audio.pause();setPlay(false);});navigator.mediaSession.setActionHandler('previoustrack',prevTrack);navigator.mediaSession.setActionHandler('nexttrack',nextTrack);navigator.mediaSession.setActionHandler('seekbackward',()=>audio.currentTime=Math.max(0,audio.currentTime-10));navigator.mediaSession.setActionHandler('seekforward',()=>audio.currentTime=Math.min(audio.duration||0,audio.currentTime+10));}
-
-/* ── PLAYLISTS ── */
-function renderSidebar(){const el=document.getElementById('plList');if(!playlists.length){el.innerHTML=`<div style="padding:8px 10px;font-size:.75rem;color:var(--text3)">No playlists yet</div>`;return;}el.innerHTML=playlists.map(pl=>`<div class="pl-item${pl.id===activePl?' active':''}" onclick="openPl('${pl.id}')"><div class="pl-dot">${pl.emoji||'📚'}</div><div class="pl-name">${pl.name}</div><span class="pl-count">${pl.tracks.length}</span><button class="pl-del" title="Delete" onclick="event.stopPropagation();deletePl('${pl.id}')">✕</button></div>`).join('');}
-function openPl(id){activePl=id;const pl=playlists.find(p=>p.id===id);if(!pl)return;document.getElementById('plCover').textContent=pl.emoji||'📚';document.getElementById('plName').textContent=pl.name;renderPlTracks();gotoView('playlist');renderSidebar();}
-function renderPlTracks(){
-  const pl=playlists.find(p=>p.id===activePl);const el=document.getElementById('plRows');if(!pl)return;
-  document.getElementById('plMeta').textContent=pl.tracks.length+' tracks';
-  if(!pl.tracks.length){el.innerHTML=`<div class="empty"><div class="ico">🎵</div><p>Playlist is empty.<br>Go to <strong>Library</strong> → right-click a track → <em>Add to [this playlist]</em>.</p></div>`;return;}
-  el.innerHTML=pl.tracks.map((fn,i)=>{
-    const gi=tracks.findIndex(t=>t.name===fn);const t=gi>=0?tracks[gi]:{title:fn,name:fn,file:'Database/'+fn};
-    const isNow=nowTrack&&nowTrack.name===fn;const dur=durations[t.file]?fmt(durations[t.file]):'—';const isCached=cachedFiles.has(t.file);
-    return`<div class="track-row pl-row${isNow?' playing':''}" data-pi="${i}" draggable="true" ondragstart="dStart(event,${i})" ondragover="dOver(event,${i})" ondrop="dDrop(event,${i})" ondragend="dEnd()" onclick="playPlAt(${i})">
-      <div class="drag-handle"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="18" x2="16" y2="18"/></svg></div>
-      <div class="trk-idx"><span class="num">${i+1}</span><div class="eq-wrap"><div class="eq-bar${playing?'':' p'}" style="height:60%"></div><div class="eq-bar${playing?'':' p'}" style="height:100%"></div><div class="eq-bar${playing?'':' p'}" style="height:45%"></div></div></div>
-      <div class="trk-info"><div class="trk-name">${t.title}</div><div class="trk-meta">${fn.replace(/\.ganuman$/i,"")}</div></div>
-      <div class="trk-dur" id="pd-${gi>=0?gi:'x'+i}">${dur}</div>
-      <button class="dl-btn ${isCached?'cached':'uncached'}" id="dlb-pl-${i}" title="${isCached?'Downloaded':'Download for offline'}" onclick="event.stopPropagation();dlTrackByFile('${t.file}')">
-        ${isCached?`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`}
-      </button>
-      <button class="trk-btn" title="Remove" onclick="event.stopPropagation();rmFromPl('${activePl}','${fn}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-    </div>`;
-  }).join('');
-  prefetch(pl.tracks.map(n=>tracks.find(t=>t.name===n)).filter(Boolean));
-}
-function playPlAt(pi){const pl=playlists.find(p=>p.id===activePl);if(!pl)return;const idxs=pl.tracks.map(n=>tracks.findIndex(t=>t.name===n)).filter(i=>i>=0);if(idxs[pi]===undefined)return;queue=idxs;qPos=pi;start(queue[qPos]);}
-function addToPl(plId,fname){const pl=playlists.find(p=>p.id===plId);if(!pl)return;if(pl.tracks.includes(fname)){toast('Already in playlist');return;}pl.tracks.push(fname);savePls();toast(`✅ Added to "${pl.name}"`);}
-function rmFromPl(plId,fname){const pl=playlists.find(p=>p.id===plId);if(!pl)return;pl.tracks=pl.tracks.filter(f=>f!==fname);savePls();renderPlTracks();renderSidebar();}
-function deletePl(id){if(!confirm('Delete this playlist?'))return;playlists=playlists.filter(p=>p.id!==id);if(activePl===id){activePl=null;gotoView('library');}savePls();renderSidebar();}
-function savePls(){localStorage.setItem('mp_pls',JSON.stringify(playlists));renderSidebar();const tok=localStorage.getItem('mp_tok');const gid=localStorage.getItem('mp_gid');if(tok&&gid)pushGist();}
-function editPlName(){const el=document.getElementById('plName');const editing=el.contentEditable==='true';if(editing){el.contentEditable='false';const pl=playlists.find(p=>p.id===activePl);if(pl){pl.name=el.textContent.trim()||pl.name;savePls();renderSidebar();}}else{el.contentEditable='true';el.focus();const r=document.createRange();r.selectNodeContents(el);window.getSelection().removeAllRanges();window.getSelection().addRange(r);}}
-function dStart(e,i){dragSrc=i;e.currentTarget.classList.add('dragging');}
-function dOver(e,i){e.preventDefault();document.querySelectorAll('.pl-row')[i]?.classList.add('drag-over');}
-function dDrop(e,i){e.preventDefault();if(dragSrc===null||dragSrc===i)return;const pl=playlists.find(p=>p.id===activePl);if(!pl)return;const a=[...pl.tracks];const[m]=a.splice(dragSrc,1);a.splice(i,0,m);pl.tracks=a;savePls();renderPlTracks();}
-function dEnd(){dragSrc=null;document.querySelectorAll('.pl-row').forEach(r=>r.classList.remove('dragging','drag-over'));}
-
-let selEmoji='📚';
-const EMOJIS=['📚','📖','🎓','🧬','⚗️','⚡','🔬','🧠','📐','🌍','💡','🎯','🏆','📝','🔭','🧪','🌱','🎵'];
-function initEmojiGrid(){const el=document.getElementById('emojiGrid');el.innerHTML=EMOJIS.map(e=>`<button class="em-opt${e===selEmoji?' on':''}" onclick="pickEmoji('${e}')">${e}</button>`).join('');}
-function pickEmoji(e){selEmoji=e;document.querySelectorAll('.em-opt').forEach(b=>b.classList.toggle('on',b.textContent===e));}
-function openNewPl(){document.getElementById('newPlName').value='';document.getElementById('newPlOverlay').classList.add('open');}
-document.getElementById('cancelPl').onclick=()=>document.getElementById('newPlOverlay').classList.remove('open');
-document.getElementById('doCreatePl').onclick=()=>{const n=document.getElementById('newPlName').value.trim();if(!n){toast('Enter a name');return;}const pl={id:Date.now().toString(36)+Math.random().toString(36).slice(2),name:n,emoji:selEmoji,tracks:[]};playlists.push(pl);savePls();document.getElementById('newPlOverlay').classList.remove('open');openPl(pl.id);toast(`✨ "${n}" created`);};
-
-const ctxMenu=document.getElementById('ctxMenu');
-function openCtx(e,gi){e.preventDefault();ctxTrk=tracks[gi];buildCtxPls();posCtx(e.clientX,e.clientY);}
-function openCtxBtn(e,gi){ctxTrk=tracks[gi];buildCtxPls();const r=e.currentTarget.getBoundingClientRect();posCtx(r.right,r.bottom);}
-function posCtx(x,y){ctxMenu.classList.add('open');ctxMenu.style.left=Math.min(x,window.innerWidth-200)+'px';ctxMenu.style.top=Math.min(y,window.innerHeight-180)+'px';}
-function buildCtxPls(){const el=document.getElementById('ctxPls');el.innerHTML=playlists.length?playlists.map(pl=>`<div class="ctx-item" onclick="addToPl('${pl.id}','${ctxTrk?.name}');ctxMenu.classList.remove('open')">${pl.emoji} Add to "${pl.name}"</div>`).join(''):`<div class="ctx-item" style="opacity:.5">No playlists — create one first</div>`;}
-document.addEventListener('click',()=>ctxMenu.classList.remove('open'));
-document.getElementById('ctxPlay').onclick=()=>{if(ctxTrk)playLib(tracks.indexOf(ctxTrk));};
-document.getElementById('ctxNext').onclick=()=>{if(!ctxTrk)return;const i=tracks.indexOf(ctxTrk);if(qPos>=0)queue.splice(qPos+1,0,i);else{queue=[i];qPos=0;}toast('Playing next: '+ctxTrk.title);};
-
-/* ── SLEEP TIMER ── */
-function openSleepModal(){selMin=null;document.querySelectorAll('.timer-opt').forEach(b=>b.classList.remove('on'));document.getElementById('customMin').value='';document.getElementById('sleepOverlay').classList.add('open');}
-document.querySelectorAll('.timer-opt').forEach(b=>{b.onclick=()=>{selMin=parseInt(b.dataset.m);document.querySelectorAll('.timer-opt').forEach(x=>x.classList.remove('on'));b.classList.add('on');document.getElementById('customMin').value='';};});
-document.getElementById('customMin').oninput=e=>{selMin=parseInt(e.target.value)||null;document.querySelectorAll('.timer-opt').forEach(b=>b.classList.remove('on'));};
-document.getElementById('startSleep').onclick=()=>{if(!selMin){toast('Pick a duration');return;}document.getElementById('sleepOverlay').classList.remove('open');startSleep(selMin*60);};
-document.getElementById('stopSleep').onclick=()=>{clearSleep();document.getElementById('sleepOverlay').classList.remove('open');toast('Sleep timer stopped');};
-document.getElementById('closeSleep').onclick=()=>document.getElementById('sleepOverlay').classList.remove('open');
-function startSleep(secs){clearSleep();sleepSecs=secs;const badge=document.getElementById('sleepBadge');badge.classList.add('show');updateSleepBadge();const baseVol=audio.volume;sleepTick=setInterval(()=>{sleepSecs--;updateSleepBadge();if(sleepSecs<=30)audio.volume=Math.max(0,(sleepSecs/30)*baseVol);if(sleepSecs<=0){audio.pause();setPlay(false);clearSleep();toast('😴 Sleep timer ended');}},1000);toast(`😴 Sleep timer: ${Math.floor(secs/60)} min`);}
-function clearSleep(){clearInterval(sleepTick);sleepSecs=0;document.getElementById('sleepBadge').classList.remove('show');audio.volume=parseFloat(volBar.value);}
-function updateSleepBadge(){document.getElementById('sleepCount').textContent=fmt(sleepSecs);}
-
-/* ── GIST ── */
-function creds(){return{tok:document.getElementById('ghToken').value.trim(),gid:document.getElementById('ghGist').value.trim()};}
-function setSS(state,msg){const d=document.getElementById('sdot');if(!d)return;d.className='sdot'+(state==='ok'?' ok':state==='err'?' err':'');document.getElementById('smsg').textContent=msg;}
-function saveGist(){const tok=document.getElementById('ghToken').value.trim();const gid=document.getElementById('ghGist').value.trim();if(!tok||!gid){toast('❌ Enter token & gist ID');return;}localStorage.setItem('mp_tok',tok);localStorage.setItem('mp_gid',gid);setSS('ok','Saved');toast('✅ Connected to GitHub');pushGist();}
-async function testGist(){const{tok,gid}=creds();if(!tok||!gid){setSS('err','Missing token or Gist ID');return;}setSS('','Testing…');try{const r=await fetch(`https://api.github.com/gists/${gid}`,{headers:{Authorization:`token ${tok}`,Accept:'application/vnd.github.v3+json'}});if(r.ok){setSS('ok','✅ Connected');toast('✅ Gist OK');}else{setSS('err','Error '+r.status);toast('❌ Gist error '+r.status);}}catch{setSS('err','Network error');toast('❌ Network error');}}
-async function pushGist(){const tok=localStorage.getItem('mp_tok');const gid=localStorage.getItem('mp_gid');if(!tok||!gid)return;const data={playlists,favs:[...favs]};try{const res=await fetch(`https://api.github.com/gists/${gid}`,{method:'PATCH',headers:{Authorization:'token '+tok,'Content-Type':'application/json'},body:JSON.stringify({files:{'musicpro.json':{content:JSON.stringify(data,null,2)}}})});if(!res.ok)throw new Error('Failed');setSS('ok','Synced');toast('✅ Synced to GitHub');}catch{setSS('err','Sync failed');toast('❌ Sync failed');}}
-async function pullGist(){const{tok,gid}=creds();if(!tok||!gid){toast('Configure token & Gist first');return;}setSS('','Pulling…');try{const r=await fetch(`https://api.github.com/gists/${gid}`,{headers:{Authorization:`token ${tok}`,Accept:'application/vnd.github.v3+json'}});if(!r.ok){setSS('err','Pull failed '+r.status);return;}const data=await r.json();const file=data.files['musicpro.json'];if(!file){setSS('err','musicpro.json not in Gist');toast('❌ musicpro.json missing');return;}const parsed=JSON.parse(file.content||'{}');playlists=Array.isArray(parsed)?parsed:Array.isArray(parsed?.playlists)?parsed.playlists:[];localStorage.setItem('mp_pls',JSON.stringify(playlists));renderSidebar();setSS('ok','Pulled · '+new Date().toLocaleTimeString());toast('⬇️ Playlists loaded from Gist');}catch{setSS('err','Pull error');toast('❌ Pull failed');}}
-
-/* ── VIEWS ── */
-function gotoView(name){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));document.getElementById('view-'+name)?.classList.add('active');document.querySelector(`[data-v="${name}"]`)?.classList.add('active');}
-
-/* ── UTILS ── */
-function fmt(s){if(!s||isNaN(s))return'0:00';return`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;}
-function setRangeStyle(el,pct){el.style.background=`linear-gradient(to right,var(--accent) ${pct}%,var(--border) ${pct}%)`;}
-let toastTmr;
-function toast(msg){const el=document.getElementById('toastEl');el.textContent=msg;el.classList.add('show');clearTimeout(toastTmr);toastTmr=setTimeout(()=>el.classList.remove('show'),2400);}
-
-/* ── CACHE API ── */
-const CACHE_NAME='musicpro-audio-v1';
-async function refreshCachedFiles(){cachedFiles.clear();try{const cache=await caches.open(CACHE_NAME);const keys=await cache.keys();keys.forEach(r=>cachedFiles.add(new URL(r.url).pathname.replace(/^\//,'')));}catch{}}
-async function getCachedUrl(url){try{const cache=await caches.open(CACHE_NAME);const match=await cache.match(url);if(match){const blob=await match.blob();return URL.createObjectURL(blob);}}catch(e){console.warn('Cache read failed',e);}return null;}
-async function fetchFullBuffer(url,tries=3){let lastErr;for(let i=0;i<tries;i++){try{const resp=await fetch(url,{cache:'no-store'});if(!resp.ok&&resp.status!==206)throw new Error('HTTP '+resp.status);const buf=await resp.arrayBuffer();if(buf.byteLength===0)throw new Error('Empty response');return{buf,ct:resp.headers.get('Content-Type')||'application/octet-stream'};}catch(e){lastErr=e;if(i<tries-1)await new Promise(r=>setTimeout(r,i*800));}}throw lastErr;}
-async function cacheUrl(url){try{const cache=await caches.open(CACHE_NAME);if(await cache.match(url))return true;const{buf,ct}=await fetchFullBuffer(url);await cache.put(url,new Response(buf,{status:200,headers:{'Content-Type':ct,'Content-Length':String(buf.byteLength)}}));return true;}catch(e){console.warn('Cache write failed',e);}return false;}
-async function dlTrack(gi){const t=tracks[gi];if(!t)return;const btn=document.getElementById('dlb-'+gi);if(btn){btn.className='dl-btn downloading';btn.title='Downloading…';}const ok=await cacheUrl(t.file);if(ok){cachedFiles.add(t.file);toast(`✅ "${t.title}" saved offline`);}else toast('❌ Download failed');renderLibrary();if(activePl)renderPlTracks();updateCacheStatus();updateDlAllBtn();}
-async function dlTrackByFile(filePath){const gi=tracks.findIndex(t=>t.file===filePath);if(gi>=0){await dlTrack(gi);return;}const ok=await cacheUrl(filePath);if(ok){cachedFiles.add(filePath);toast('✅ Saved offline');}else toast('❌ Download failed');if(activePl)renderPlTracks();updateCacheStatus();updateDlAllBtn();}
-async function downloadPlaylist(){const pl=playlists.find(p=>p.id===activePl);if(!pl||!pl.tracks.length){toast('Playlist is empty');return;}const btn=document.getElementById('plDlBtn');if(btn)btn.style.color='var(--gold)';toast(`⬇️ Downloading ${pl.tracks.length} tracks…`);let done=0;for(const fn of pl.tracks){const t=tracks.find(t=>t.name===fn)||{file:'Database/'+fn};const ok=await cacheUrl(t.file);if(ok)cachedFiles.add(t.file);done++;toast(`⬇️ ${done}/${pl.tracks.length} downloaded…`);}if(btn)btn.style.color='var(--green)';toast(`✅ ${pl.tracks.length} tracks saved offline`);renderPlTracks();updateCacheStatus();updateDlAllBtn();}
-async function updateCacheStatus(){const dot=document.getElementById('cacheDot');const msg=document.getElementById('cacheMsg');if(!dot||!msg)return;try{const cache=await caches.open(CACHE_NAME);const keys=await cache.keys();if(!keys.length){dot.className='sdot';msg.textContent='No tracks downloaded yet — tap ⬇️ on any track.';}else{let bytes=0;for(const req of keys){const resp=await cache.match(req);if(resp){const buf=await resp.arrayBuffer();bytes+=buf.byteLength;}}const mb=(bytes/1024/1024).toFixed(1);dot.className='sdot ok';msg.textContent=`${keys.length} track${keys.length!==1?'s':''} downloaded · ${mb} MB`;}}catch{dot.className='sdot err';msg.textContent='Cache API not available in this browser';}}
-async function clearAudioCache(){if(!confirm('Delete all downloaded tracks? They will need to be re-downloaded.'))return;try{await caches.delete(CACHE_NAME);cachedFiles.clear();toast('🗑️ All downloads cleared');renderLibrary();if(activePl)renderPlTracks();updateCacheStatus();updateDlAllBtn();}catch{toast('❌ Could not clear downloads');}}
-document.querySelectorAll('[data-v="settings"]').forEach(btn=>btn.addEventListener('click',()=>setTimeout(updateCacheStatus,100)));
-
-/* ── ENCRYPTION ── */
-const _GM_MAGIC=new Uint8Array([0x47,0x41,0x4E,0x55,0x4D,0x41,0x4E,0x21]);
-const _GM_PASS='Ganu&Anu#1999! Love';
-async function _gmKey(salt){const raw=await crypto.subtle.importKey('raw',new TextEncoder().encode(_GM_PASS),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:200000,hash:'SHA-256'},raw,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);}
-async function _gmDecrypt(arrayBuffer){const d=new Uint8Array(arrayBuffer);for(let i=0;i<_GM_MAGIC.length;i++){if(d[i]!==_GM_MAGIC[i])return null;}let off=_GM_MAGIC.length;const salt=d.slice(off,off+16);off+=16;const iv=d.slice(off,off+12);off+=12;const cipher=d.slice(off);const key=await _gmKey(salt);const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv},key,cipher);return URL.createObjectURL(new Blob([plain],{type:'audio/mpeg'}));}
-
-window._blobUrls={};
-async function startWithDecrypt(gi){
-  const t=tracks[gi];if(!t)return;
-  unloadAudio();
-  if(t.file.toLowerCase().endsWith('.ganuman')){
-    try{
-      Object.keys(window._blobUrls).forEach(k=>{if(Number(k)!==gi){URL.revokeObjectURL(window._blobUrls[k]);delete window._blobUrls[k];}});
-      let buf;const cache=await caches.open(CACHE_NAME);const cached=await cache.match(t.file);
-      if(cached){buf=await cached.clone().arrayBuffer();}
-      else{const{buf:fetched,ct}=await fetchFullBuffer(t.file);buf=fetched;cache.put(t.file,new Response(buf.slice(0),{status:200,headers:{'Content-Type':ct,'Content-Length':String(buf.byteLength)}}));}
-      const burl=await _gmDecrypt(buf);if(!burl){toast('❌ Invalid .ganuman file');return;}
-      window._blobUrls[gi]=burl;
-      audio.addEventListener('canplay',()=>{Object.keys(window._blobUrls).forEach(k=>{if(Number(k)!==gi){URL.revokeObjectURL(window._blobUrls[k]);delete window._blobUrls[k];}});},{once:true});
-      nowTrack=t;document.getElementById('nowArt').textContent='🎓';document.getElementById('nowTitle').textContent=t.title;document.getElementById('nowSub').textContent=t.name.replace(/\.ganuman$/i,'');
-      updateMS(t);renderLibrary();if(activePl)renderPlTracks();updateHeart();
-      _playSrc(burl);return;
-    }catch(e){console.error(e);toast('❌ Could not decrypt file');return;}
-  }
-  (async()=>{
-    const t2=tracks[gi];if(!t2)return;nowTrack=t2;let src=t2.file;
-    const cached=await getCachedUrl(t2.file);
-    if(cached){src=cached;}else{cacheUrl(t2.file).then(ok=>{if(ok){cachedFiles.add(t2.file);renderLibrary();if(activePl)renderPlTracks();updateDlAllBtn();}});}
-    document.getElementById('nowArt').textContent='🎓';document.getElementById('nowTitle').textContent=t2.title;document.getElementById('nowSub').textContent=t2.name.replace(/\.ganuman$/i,'');
-    updateMS(t2);renderLibrary();if(activePl)renderPlTracks();updateHeart();_playSrc(src);
-  })();
-}
-window.start=startWithDecrypt;
-function playLib(gi){queue=tracks.map((_,i)=>i);qPos=gi;if(shuffle)shuffleQ(gi);startWithDecrypt(gi);}
-function playPlaylist(){const pl=playlists.find(p=>p.id===activePl);if(!pl||!pl.tracks.length){toast('Playlist is empty');return;}const idxs=pl.tracks.map(n=>tracks.findIndex(t=>t.name===n)).filter(i=>i>=0);if(!idxs.length){toast('⚠️ Tracks not found in library');return;}queue=idxs;qPos=0;if(shuffle)shuffleQ(idxs[0]);startWithDecrypt(queue[0]);}
-</script>
+<script src="assets/js/supabase-config.js"></script>
+<script src="assets/js/app.js"></script>
 </body>
 </html>
