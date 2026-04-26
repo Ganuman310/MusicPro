@@ -210,62 +210,9 @@
           </div>
         </div>
 
-        <!-- Library Source -->
-        <div class="setting-section">
-          <div class="setting-section-title">Library Source</div>
-          <div class="setting-row">
-            <div class="setting-label">
-              <strong>GitHub Username</strong>
-              <small>Your GitHub account username</small>
-            </div>
-            <input id="ghUser" class="setting-input" placeholder="e.g. ganu123" autocomplete="off"/>
-          </div>
-          <div class="setting-row">
-            <div class="setting-label">
-              <strong>Repository Name</strong>
-              <small>Repo containing Database/ folder</small>
-            </div>
-            <input id="ghRepo" class="setting-input" placeholder="e.g. my-lectures" autocomplete="off"/>
-          </div>
-          <div class="setting-row">
-            <div class="setting-label">
-              <div style="display:flex;align-items:center;gap:8px">
-                <div id="scanDot" class="sdot"></div>
-                <span id="scanMsg" style="font-size:12px;color:var(--text2)">Not scanned yet</span>
-              </div>
-            </div>
-            <button class="setting-btn primary" onclick="scanDatabase()">Scan Library</button>
-          </div>
-        </div>
 
-        <!-- Encryption -->
-        <div class="setting-section">
-          <div class="setting-section-title">Encryption</div>
 
-          <!-- STATE A: Password already saved in Supabase -->
-          <div id="encSavedState" class="setting-row" style="display:none">
-            <div class="setting-label">
-              <strong>Decryption Password</strong>
-              <small>🔐 Saved securely in your account — fetched automatically on login. Files will decrypt silently.</small>
-            </div>
-            <div style="display:flex;gap:8px">
-              <button class="setting-btn ghost" onclick="changeEncPassword()">Change</button>
-              <button class="setting-btn danger" onclick="removeEncPassword()">Remove</button>
-            </div>
-          </div>
 
-          <!-- STATE B: No password set yet -->
-          <div id="encSetupState" class="setting-row" style="display:block">
-            <div class="setting-label">
-              <strong>Set Decryption Password</strong>
-              <small>Enter the password used to encrypt your .ganuman files. It will be saved securely to your Supabase account and fetched automatically every time you log in — you will never need to type it again.</small>
-            </div>
-            <div style="display:flex;gap:8px;align-items:center">
-              <input id="encNewPassword" class="setting-input" type="password" placeholder="Enter password…" autocomplete="off" onkeydown="if(event.key==='Enter')saveEncPassword()"/>
-              <button class="setting-btn primary" onclick="saveEncPassword()">Save</button>
-            </div>
-          </div>
-        </div>
 
         <!-- Playback -->
         <div class="setting-section">
