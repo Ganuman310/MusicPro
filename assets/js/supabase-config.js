@@ -19,7 +19,7 @@ async function signInWithGoogle() {
   const { error } = await _supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: window.location.origin + window.location.pathname.replace(//[^/]*$/, '/index.html')
+      redirectTo: 'https://ganuman310.github.io/MusicPro/index.html'
     }
   });
   if (error) throw error;
@@ -111,7 +111,6 @@ async function dbRemoveTrackFromPlaylist(playlistId, filename) {
 }
 
 async function dbReorderPlaylistTracks(playlistId, filenames) {
-  // Delete all then re-insert with new positions
   await _supabase.from('playlist_tracks').delete().eq('playlist_id', playlistId);
   const rows = filenames.map((fn, i) => ({ playlist_id: playlistId, filename: fn, position: i }));
   const { error } = await _supabase.from('playlist_tracks').insert(rows);
@@ -164,9 +163,6 @@ async function dbSavePreferences(userId, prefs) {
 }
 
 // ── ENCRYPTION PASSWORD HELPERS ──
-// Password is stored in Supabase preferences table (enc_password column).
-// It is fetched once on login into a JS memory variable — never written
-// to the DOM, localStorage, or any log. RLS ensures only the owner can read it.
 
 async function dbGetEncPassword(userId) {
   const { data, error } = await _supabase
