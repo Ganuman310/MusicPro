@@ -53,13 +53,23 @@ self.addEventListener('fetch', e => {
 
   // Audio files (.ganuman) — cache first, then network
   if (url.pathname.includes('Database/') || url.pathname.endsWith('.ganuman')) {
+    // Audio files — skip range requests (206), only cache full responses (200)
     e.respondWith(
       caches.open(AUDIO_CACHE).then(async cache => {
         const cached = await cache.match(e.request);
         if (cached) return cached;
         try {
-          const resp = await fetch(e.request);
-          if (resp.ok) cache.put(e.request, resp.clone());
+          // Force a full request (no range headers) so we get 200 not 206
+          const fullReq = new Request(e.request.url, {
+            method: 'GET',
+            headers: { Range: undefined }
+          });
+          const resp = await fetch(fullReq);
+          // Only cache complete responses — never cache 206 partial
+          if (resp.status === 200) {
+            const respToCache = resp.clone();
+            cache.put(e.request.url, respToCache);
+          }
           return resp;
         } catch {
           return new Response('Offline', { status: 503 });
@@ -74,12 +84,13 @@ self.addEventListener('fetch', e => {
     caches.match(e.request).then(cached => {
       if (cached) return cached;
       return fetch(e.request).then(resp => {
-        if (resp.ok) {
-          caches.open(SHELL_CACHE).then(c => c.put(e.request, resp.clone()));
+        // Only cache full successful responses
+        if (resp.ok && resp.status === 200) {
+          const respToCache = resp.clone();
+          caches.open(SHELL_CACHE).then(c => c.put(e.request, respToCache));
         }
         return resp;
       }).catch(() => {
-        // Fallback to index.html for navigation requests (SPA)
         if (e.request.mode === 'navigate') {
           return caches.match('./index.html');
         }
